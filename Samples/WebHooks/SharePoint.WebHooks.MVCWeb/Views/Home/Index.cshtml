@@ -1,0 +1,155 @@
+﻿@model SharePoint.WebHooks.MVCWeb.Models.SharePointSiteModel
+
+@{
+    ViewBag.Title = "Home Page";
+}
+
+@using (Html.BeginForm("Create", "Home", FormMethod.Post))
+{
+    <div class="row">
+        <h2>Existing web hooks</h2>
+
+        <table cellpadding="3">
+            <thead>
+                <tr>
+                    <th>Actions</th>
+                    <th>Subscription id</th>
+                    <th>List</th>
+                    <th>Webhook endpoint</th>
+                    <th>Webhook expires at</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.WebHooks.Count() == 0)
+                {
+                    <tr>
+                        <td colspan="5">There are currently no web hooks defined for the lists in this web!</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var webHook in Model.WebHooks)
+                    {
+                        var list = Model.Lists.Where(f => f.Id == new Guid(webHook.Resource)).FirstOrDefault();
+                        string listName = "";
+                        if (list != null)
+                        {
+                            listName = String.Format("{0} - {1}", list.Title, webHook.Resource);
+                        }
+
+                        <tr>
+                            <td>
+                                @Html.ActionLink("Delete", "Delete", "Home", new RouteValueDictionary(new { id = webHook.Id, listId = webHook.Resource }), null)
+                            </td>
+                            <td>@webHook.Id</td>
+                            <td> @{ @listName }</td>
+                            <td>@webHook.NotificationUrl</td>
+                            <td>@webHook.ExpirationDateTime</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        <br/>
+        <br/>
+        <h2>Add a new web hook</h2>
+        <table cellpadding="3">
+            <tr>
+                <td>Select a list:</td>
+                <td>@Html.DropDownListFor(m => m.SelectedSharePointList, new SelectList(Model.Lists, "Id", "Title", Model.SelectedSharePointList), new { @id = "ListDropDown" }) </td>
+                <td><input type="button" value="Create" id="btnCreate"/></td>
+                <td>
+                    <div id="workingOnIt" style="margin-left:10px; float:left">
+                        @Html.Partial("_WorkingOnIt")
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    @section Scripts {
+    <script>
+        function ShowDonut() {
+            $("#workingOnIt").show();
+        }
+
+        function HideDonut() {
+            $("#workingOnIt").hide();
+        }
+
+        $(document).ready(function () {
+
+            HideDonut();
+
+            $("#btnCreate").click(function (e) {
+                e.preventDefault();
+
+                var spHostUrl = getSPHostUrlFromQueryString(window.location.search);
+
+                var urlAddProduct = "/Home/Create?SPHostUrl=" + spHostUrl;
+
+                ShowDonut();
+                $.post(urlAddProduct,
+                        {
+                            selectedSharePointList: $('#ListDropDown option:selected').val()
+                        }).done(function () {
+                            window.location.href = "/Home/Index?SPHostUrl=" + spHostUrl;
+                        })
+                        .fail(function () {
+                            HideDonut();
+                            alert("Error while posting back to SharePoint");
+                        });
+            });
+
+            // Gets SPHostUrl from the given query string.
+            function getSPHostUrlFromQueryString(queryString) {
+                if (queryString) {
+                    if (queryString[0] === "?") {
+                        queryString = queryString.substring(1);
+                    }
+
+                    var keyValuePairArray = queryString.split("&");
+
+                    for (var i = 0; i < keyValuePairArray.length; i++) {
+                        var currentKeyValuePair = keyValuePairArray[i].split("=");
+
+                        if (currentKeyValuePair.length > 1 && currentKeyValuePair[0] == "SPHostUrl") {
+                            return currentKeyValuePair[1];
+                        }
+                    }
+                }
+
+                return null;
+            }
+
+        });
+
+    </script>
+    }
+
+}
+
+
+        @*<div class="jumbotron">
+                <h2>Welcome @ViewBag.UserName!</h2>
+                <p class="lead"><b>Apps for SharePoint - </b>Embracing web standards, the new cloud app model gives you maximum choice and flexibility to build a new class of apps for SharePoint using familiar languages, tools, and hosting services.</p>
+                <p><a href="http://dev.office.com" class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <h2>Overview</h2>
+                    <p>SharePoint introduces a Cloud App Model that enables you to create apps. Learn what apps for SharePoint are, why you should build them, and the concepts that are fundamental to building them for SharePoint.</p>
+                    <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkID=294439">Learn more &raquo;</a></p>
+                </div>
+                <div class="col-md-4">
+                    <h2>Samples</h2>
+                    <p>Download apps for SharePoint code samples. New samples are added frequently in JavaScript, C#, and VB.NET.</p>
+                    <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkID=294440">Learn more &raquo;</a></p>
+                </div>
+                <div class="col-md-4">
+                    <h2>Developer training</h2>
+                    <p>Learn about apps for SharePoint with this interactive course offering developer-focused how to training and walkthrough videos.</p>
+                    <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkID=294441">Learn more &raquo;</a></p>
+                </div>
+            </div>*@

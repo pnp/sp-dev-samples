@@ -1,0 +1,46 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+
+@{
+    ViewBag.Title = "Oops! Exception occurred!";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="table">
+    <div class="row">
+        <div class="col-sm-12">
+            @if (Model != null && Model.Exception != null)
+            {
+                <h3>@Model.Exception.Message</h3>
+
+                <div class="showErrorLink"><a href="#">Click here to see more details</a></div>
+                <div class="error">
+                    <hr />
+                    <div>@Model.Exception.StackTrace</div>
+                </div>
+            }
+            else
+            {
+                <h1 class="text-danger">Error.</h1>
+                <h2 class="text-danger">An error occurred while processing your request.</h2>
+            }
+
+        </div>
+    </div>
+</div>
+
+<script language="javascript">
+
+    $(document).ready(function() {
+
+        $(".error").hide();
+
+        $(document).on("click", ".showErrorLink a", function (e) {
+                    e.preventDefault();
+                    $(".error").show();
+                    $(".showErrorLink a").hide();
+                }
+            );
+    })
+
+</script>
