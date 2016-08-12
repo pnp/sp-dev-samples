@@ -178,7 +178,7 @@ namespace SharePoint.WebHooks.MVCWeb.Controllers
         /// <param name="cc">ClientContext object</param>
         private void SampleUsageTracking(ClientContext cc)
         {
-            cc.ClientTag = "SPDevSamples:WebHooks";
+            cc.ClientTag = "SPDev:WebHooks";
             cc.Load(cc.Web, p => p.Description);
             cc.ExecuteQuery();
         }
