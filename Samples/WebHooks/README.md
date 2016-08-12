@@ -25,7 +25,7 @@ Version  | Date | Comments
 
 ----------
 
-## Quick glance on this sample #
+## Quick glance at this sample #
 This sample application will show you how to manage web hooks (list defined web hooks, create new ones, update and delete existing ones). It also contains a reference implementation of a web hook service endpoint which you can reuse in your web hook projects. 
 
 ![SharePoint Web Hook sample application](http://i.imgur.com/iJO6ukm.png)
