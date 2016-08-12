@@ -6,15 +6,18 @@ For this sample we're using Azure Web Apps to host the SharePoint Add-In and hos
 
 ### Creating the Azure Web Application
 1) Adding a new Azure Web App
+
 ![Adding an Azure web app](http://i.imgur.com/1M8Zulm.png)
 
 2) Give your web app a unique name, pick the subscription and resource group you want and finally select a service plan:
+
 ![Web App settings](http://i.imgur.com/CLBfu1O.png)
 
 > **Important**
 Remember the url you've chosen (pnpwebhookdemo.azurewebsites.net) in above screen-shot
 
 3) Once the Web App is provisioned navigate to it and download it's publishing profile.
+
 ![Download the publishing profile](http://i.imgur.com/Db304vY.png)
 
 > **Important**
@@ -22,37 +25,46 @@ Store the publishing profile as you'll need this file later on
 
 ### Creating the Azure SQL Server database
 1) Adding a new Azure SQL database
+
 ![Create a SQL Azure database](http://i.imgur.com/1gfOYtD.png)
 
 2) Give your database a name, pick the subscription and resource group you want, select a service plan and select a server
+
 ![Configure DB](http://i.imgur.com/dT6dcej.png)
 
 > **Important**
 Remember the name you've chosen (PnPWebHookDemo) in above screen-shot
 
 2.1) Select an existing Azure SQL server if you already have one
+
 ![Select existing server](http://i.imgur.com/PaRSrmb.png)
 
 2.2) or create a new Azure SQL server
+
 ![Create new SQL Azure server](http://i.imgur.com/cbQj9P6.png)
 
 > **Important**
 Remember the name of the server you've chosen
 
 3) Navigate to the created database and go to the server firewall settings
+
 ![Configure SQL server](http://i.imgur.com/FPWAdQA.png)
 
 4) Configure the Azure SQL server firewall to allow access to the IP your using. 
+
 ![Configure firewall settings](http://i.imgur.com/PIVbThW.png)
 
 ### Creating the Azure Storage account
 1) Add a new storage account
+
 ![Create storage account](http://i.imgur.com/wfkbjBc.png)
 
 2) Configure the storage account: use the classic deployment model, select your subscription and resource group and finalize the account creation
+
 ![Configure storage account](http://i.imgur.com/oEuDeV5.png)
 
 3) Once the storage account is available navigate to it, go to Keys and copy the primary connections string
+
 ![Copy the connection string](http://i.imgur.com/6cGA3DQ.png)
 
 > **Important**
@@ -61,23 +73,28 @@ Remember the storage account connection string
 ## Preparing SharePoint to host the application
 
 1) Browse to the site you want to deploy the application on and create a new principal via hitting the appregnew.aspx page. You can generate the client id and secret, give it a title and define the app domain being the Azure Web app you've created earlier on (pnpwebhookdemo.azurewebsites.net) and finally enter the redirect url (https://pnpwebhookdemo.azurewebsites.net in this case).
+
 ![Appregnew](http://i.imgur.com/Rn4gFG3.png)
 
 > **Important**
 Remember the client id and client secret
 
 2) Verify you can access your applications app catalog which you can reach via your SharePoint Administration site
+
 ![Go to the app catalog](http://i.imgur.com/lgt7zF6.png)
 
 2.1) If you do not yet have an app catalog then create one
+
 ![Create a new app catalog](http://i.imgur.com/j2vmPIb.png)
 
 ## Prepare the application
 ### Configure the SQL Azure database
 1) Using SQL Server Management Studio (SSMS) connect to your SQL Azure database server
+
 ![Connect to your SQL Azure database](http://i.imgur.com/f98MPzP.png)
 
 2) Open a new query for the SQL Azure database you've created earlier on (PnPWebHookDemo) in this case. The SQL script can be found in the SharePoint.WebHooks.Common project, folder SQL/scripts.
+
 ![Create database structure](http://i.imgur.com/NZjVM0i.png)
 
 ```SQL
@@ -109,6 +126,7 @@ GO
 ```
 
 3) Open a new query for the master database and run the below shown SQL command to create a new login
+
 ![Create account](http://i.imgur.com/YTRzoZ5.png)
 
 ```SQL
@@ -116,6 +134,7 @@ CREATE LOGIN WebHooksAdmin WITH PASSWORD = 'Pass@word1'
 ```
 
 4) Create a database user and grant it permissions
+
 ![Create user and grant roles](http://i.imgur.com/5cs8Psm.png)
 
 ```SQL
@@ -209,57 +228,74 @@ Update the app.config from the SharePoint.WebHooks.Common project as shown below
 
 ### Deploy the SharePoint Add-In - deploying to Azure
 1) Right click on the SharePoint.WebHooks.MVCWeb project and choose publish
+
 ![Deploy the MVC app](http://i.imgur.com/AlOI9eI.png)
 
 2) Import the earlier on downloaded publishing profile file
+
 ![Import the connection file](http://i.imgur.com/RMz6GuL.png)
 
 3) Switch the destination url to https
+
 ![Configure the web publish wizard](http://i.imgur.com/048rUFo.png)
 
 4) Choose the **Debug** configuration (at least if you want to remotely debug), select the created database and click on **Publish**
+
 ![Finalize the configuration and publish](http://i.imgur.com/ZQS79SP.png)
 
 ### Deploy the SharePoint Add-In - deploying to SharePoint
 1) Right click on the SharePoint.WebHooks.MVC project and choose publish
+
 ![Publish the SharePoint part](http://i.imgur.com/h8DVwI1.png)
 
 2) Select **Package the add-in**
+
 ![Package the add-in](http://i.imgur.com/isTXecw.png)
 
 3) Add your client id
+
 ![Add your client id](http://i.imgur.com/euVFVVy.png)
 
 4) Upload the created app package to the tenant app catalog
+
 ![Upload to tenant app catalog](http://i.imgur.com/T3WbCWz.png)
 
 ### Deploy the Azure web job
 1) Right click on the SharePoint.WebHooks.Job project and choose **Publish as Azure WebJob**
+
 ![Publish as Azure web job](http://i.imgur.com/hdQFtpZ.png)
 
 2) Define a schedule: choose continous + remove dots from the default name
+
 ![Define a schedule](http://i.imgur.com/oU2Ip67.png)
 
 3) Import the earlier on downloaded publishing profile file
+
 ![Import the publishing profile](http://i.imgur.com/HMS1XJu.png)
 
 4) Switch the destination url to https
+
 ![Update settings](http://i.imgur.com/5srlxCr.png)
 
 5) Choose the **Debug** configuration (at least if you want to remotely debug) and click on **Publish**
+
 ![Select config and publish](http://i.imgur.com/0jBLMdC.png)
 
 6) Go to Azure management portal and verify the web job is created and in running state
+
 ![Verify in Azure management portal](http://i.imgur.com/EsJE5rs.png)
 
 ### Add the application to your SharePoint site
 1) Add the add-in to your site via **site contents**
+
 ![Add an add-in](http://i.imgur.com/pMvnJGZ.png)
 
 2) Select the correct add-in to add
+
 ![Choose your add-in](http://i.imgur.com/S3ArAZ4.png)
 
 3) The add-in will need to be trusted upon installation. Note that it can take a few minutes before the add-in installation is complete, please wait a bit before testing it.
+
 ![Trust the add-in](http://i.imgur.com/8SOzJ0Y.png)
 
 **Congrats!! You've completed the installation of this sample.**
