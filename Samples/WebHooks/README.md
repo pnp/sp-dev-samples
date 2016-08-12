@@ -25,8 +25,12 @@ Version  | Date | Comments
 
 ----------
 
-# Deployment #
-Before jumping into details around this sample and web hooks in general I wanted to make you aware of the [deployment guide for this sample](deployment guide.md).
+## Quick glance on this sample #
+This sample application will show you how to manage web hooks (list defined web hooks, create new ones, update and delete existing ones). It also contains a reference implementation of a web hook service endpoint which you can reuse in your web hook projects. 
+
+![SharePoint Web Hook sample application](http://i.imgur.com/iJO6ukm.png)
+
+Before jumping into more details around this sample and web hooks in general I wanted to make you aware of the [deployment guide for this sample](Deployment guide.md).
 
 ## Introduction to web hooks ##
 The key functionality of web hooks is notifying your applications from changes in SharePoint they're interested in. There's no need anymore for your application to regularly poll for changes anymore as with web hooks your application will be notified (**push** model) whenever there's a change. Web hooks are not Microsoft specific, it rather is a universal web standard that's also being adopted by other vendors (e.g. WordPress, GitHub, MailChimp,...). Looking at the Microsoft world we also have web hooks in production for other Office 365 components like OneDrive and Outlook. In the upcoming chapters you'll learn how to add a web hook and how to correctly deal with web hook notifications that you'll get from SharePoint. 
@@ -34,8 +38,8 @@ The key functionality of web hooks is notifying your applications from changes i
 > **Important**
 Web hooks are only fired after a change happened (so similar to **-ed** events), synchronous (**-ing** events) are not possible.
 
+If you want to learn more about the technical implementation of web hooks then reading [our technical documentation](https://github.com/SharePoint/sp-dev-docs/wiki/SharePoint-Webhooks "web hooks technical overview") is highly recommended. This sample is not a bare bones sample as it's meant to be a reference implementation. If you want to experiment with web hooks then you should also checkout our [basic tutorial](https://github.com/SharePoint/sp-dev-docs/wiki/Webhooks-Basic-Tutorial "Basic tutorial").
 
-todo: add link to chaks web hook docs.
 
 ### Adding a web hook to your SharePoint list ###
 To add a web hook your application first needs create a web hook subscription by **(step number 1)** by doing a `POST /_api/web/lists('list-id')/subscriptions` while specifying a payload that identifies the list which we're adding the web hook for, the location of our web hook service (see later) and the expiration date of the web hook. 
