@@ -115,6 +115,7 @@ To guarantee an immediate response, regardless of the number of changes there, i
 
 ### Complete end-to-end flow
 Below diagram is showing the complete end-to-end web hook flow:
+
 1. Your application creates a web hook subscription. When it does it grabs the current changeToken from the list it created the web hook for
 2. Your application persists the changeToken in a persistent storage (SQL Azure in this sample)
 3. A change in SharePoint happens and SharePoint calls your service endpoint
