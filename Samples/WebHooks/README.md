@@ -36,7 +36,7 @@ Before jumping into more details around this sample and web hooks in general I w
 The key functionality of web hooks is notifying your applications from changes in SharePoint they're interested in. There's no need anymore for your application to regularly poll for changes anymore as with web hooks your application will be notified (**push** model) whenever there's a change. Web hooks are not Microsoft specific, it rather is a universal web standard that's also being adopted by other vendors (e.g. WordPress, GitHub, MailChimp,...). Looking at the Microsoft world we also have web hooks in production for other Office 365 components like OneDrive and Outlook. In the upcoming chapters you'll learn how to add a web hook and how to correctly deal with web hook notifications that you'll get from SharePoint. 
 
 > **Important**
-Web hooks are only fired after a change happened (so similar to **-ed** events), synchronous (**-ing** events) are not possible.
+- Web hooks are only fired after a change happened (so similar to **-ed** events), synchronous (**-ing** events) are not possible.
 
 If you want to learn more about the technical implementation of web hooks then reading [our technical documentation](https://github.com/SharePoint/sp-dev-docs/wiki/SharePoint-Webhooks "web hooks technical overview") is highly recommended. This sample is not a bare bones sample as it's meant to be a reference implementation. If you want to experiment with web hooks then you should also checkout our [basic tutorial](https://github.com/SharePoint/sp-dev-docs/wiki/Webhooks-Basic-Tutorial "Basic tutorial").
 
@@ -45,7 +45,7 @@ If you want to learn more about the technical implementation of web hooks then r
 To add a web hook your application first needs create a web hook subscription by **(step number 1)** by doing a `POST /_api/web/lists('list-id')/subscriptions` while specifying a payload that identifies the list which we're adding the web hook for, the location of our web hook service (see later) and the expiration date of the web hook. 
 
 > **Important**
-You need to specify the expiration date of your web hook and this can be maximum 6 months. Later on you'll learn how to prolong your web hook.
+- You need to specify the expiration date of your web hook and this can be maximum 6 months. Later on you'll learn how to prolong your web hook.
 
 Once you've requested SharePoint to add your web hook SharePoint will validate that your web hook service end point does exist **(step number 2)**. It will do this by sending a validation string to your service endpoint. SharePoint will expect that the endpoint returns the received validation string within 5 seconds. If this fails then the web hook creation is canceled. In you've deployed your service then this will work **(step number 3)** and SharePoint return a HTTP 201 message on the POST request you issued in step number 1. The payload of the returning message contains the ID of the web hook subscription...if you later on want to manipulate the web hook subscription you need this ID.
 
