@@ -1,7 +1,7 @@
 # SharePoint Web Hooks reference implementation #
 
 ### Summary ###
-This SharePoint PnP reference implementation shows how you can you can make use of web hooks in your applications. The web hooks are implemented in an enterprise ready manner using various Azure components such as Azure Web Jobs, Azure SQL Server and Azure Storage Queues for asynchronous web job notification handling. If you want learn more about web hooks then you can continue reading but do know that we've also recorded a web cast: https://channel9.msdn.com/blogs/OfficeDevPnP/PnP-Web-Cast-Introducing-SharePoint-WebHooks. 
+This SharePoint PnP reference implementation shows how you can you can make use of web hooks in your applications. The web hooks are implemented in an enterprise ready manner using various Azure components such as Azure Web Jobs, Azure SQL Server and Azure Storage Queues for asynchronous web job notification handling. If you want learn more about web hooks then you can continue reading but do know that we've also recorded a web cast which you can find on our YouTube channel: https://www.youtube.com/watch?v=j3hWCAI9R20. 
 
 ### Applies to ###
 -  Office 365 Multi Tenant (MT)
