@@ -38,7 +38,7 @@ The key functionality of web hooks is notifying your applications from changes i
 > **Important**
 - Web hooks are only fired after a change happened (so similar to **-ed** events), synchronous (**-ing** events) are not possible.
 
-If you want to learn more about the technical implementation of web hooks then reading [our technical documentation](https://github.com/SharePoint/sp-dev-docs/wiki/SharePoint-Webhooks "web hooks technical overview") is highly recommended. This sample is not a bare bones sample as it's meant to be a reference implementation. If you want to experiment with web hooks then you should also checkout our [basic tutorial](https://github.com/SharePoint/sp-dev-docs/wiki/Webhooks-Basic-Tutorial "Basic tutorial").
+If you want to learn more about the technical implementation of web hooks then reading [our technical documentation](https://github.com/SharePoint/sp-dev-docs/wiki/SharePoint-Webhooks "web hooks technical overview") is highly recommended. This sample is not a bare bones sample as it's meant to be a reference implementation. If you want to experiment with web hooks then you should also checkout our [basic tutorial](https://github.com/SharePoint/sp-dev-docs/wiki/Webhooks-Basic-Tutorial "Basic tutorial") for which we've also recorded [a web cast which is worth while checking out](https://www.youtube.com/watch?v=IbVlDkmsh8w "Getting started web cast").
 
 
 ### Adding a web hook to your SharePoint list ###
