@@ -1,5 +1,5 @@
 # SharePoint web hooks reference implementation - Deployment guide #
-This guide will provide you step by step guidance on how to deploy this sample application. We'll first start with preparing the Azure resources, then we'll prep the application and SharePoint needs and finally and show you how to deploy the needed components.
+This guide will provide you step by step guidance on how to deploy this sample application. We'll first start with preparing the Azure resources, then we'll prep the application and SharePoint needs and finally we'll show you how to deploy the needed components.
 
 ## Preparing Microsoft Azure for hosting the web hook sample application
 For this sample we're using Azure Web Apps to host the SharePoint Add-In and host the Azure Web Jobs, we using an Azure Storage Account for it's queuing option and finally we use a SQL Azure database to host our data. In this chapter you'll be guided in how to setup these. All of the work in below chapters is done using the Azure management portal (https://portal.azure.com). 
