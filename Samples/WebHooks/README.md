@@ -1,10 +1,14 @@
 # SharePoint Web Hooks reference implementation #
 
 ### Summary ###
-This SharePoint PnP reference implementation shows how you can you can make use of web hooks in your applications. The web hooks are implemented in an enterprise ready manner using various Azure components such as Azure Web Jobs, Azure SQL Server and Azure Storage Queues for asynchronous web job notification handling. If you want learn more about web hooks then you can continue reading but do know that we've also recorded a web cast which you can find on our YouTube channel: https://www.youtube.com/watch?v=j3hWCAI9R20. 
+This SharePoint PnP reference implementation shows how you can you can make use of web hooks in your applications. The web hooks are implemented in an enterprise ready manner using various Azure components such as Azure Web Jobs, Azure SQL Server and Azure Storage Queues for asynchronous web job notification handling. If you want learn more about web hooks then you can continue reading but do know that we've also recorded a web cast which is available from the [SharePoint PnP YouTube Channel](https://www.youtube.com/watch?v=j3hWCAI9R20).
+
+<a href="https://www.youtube.com/watch?v=j3hWCAI9R20">
+<img src="http://i.imgur.com/0tqP0kO.png" alt="PnP webcast - Introducing SharePoint webhooks" />
+</a>
 
 ### Applies to ###
--  Office 365 Multi Tenant (MT)
+- Office 365 Multi Tenant (MT) with [First Release enabled](https://support.office.com/en-us/article/Set-up-the-Standard-or-First-Release-options-in-Office-365-3b3adfa4-1777-4ff0-b606-fb8732101f47).
 
 ### Prerequisites ###
 Microsoft Azure is used to host the various components needed to implement Azure Web Hooks.
@@ -12,7 +16,7 @@ Microsoft Azure is used to host the various components needed to implement Azure
 ### Solution ###
 Solution | Author(s)
 ---------|----------
-SharePoint.WebHooks | Bert Jansen (Microsoft)
+SharePoint.WebHooks | Bert Jansen (**Microsoft**)
 
 ### Version history ###
 Version  | Date | Comments
@@ -25,29 +29,25 @@ Version  | Date | Comments
 
 ----------
 
-## Quick glance at this sample #
-This sample application will show you how to manage web hooks (list defined web hooks, create new ones, update and delete existing ones). It also contains a reference implementation of a web hook service endpoint which you can reuse in your web hook projects. 
+## Deploying this sample reference implementation #
+This sample application will show you how to manage webhooks, specifically managing webhooks for a SharePoint list. It also contains a reference implementation of a webhook service endpoint which you can reuse in your webhook projects.
 
 ![SharePoint Web Hook sample application](http://i.imgur.com/iJO6ukm.png)
 
 Before jumping into more details around this sample and web hooks in general I wanted to make you aware of the [deployment guide for this sample](Deployment guide.md).
 
 ## Introduction to web hooks ##
-The key functionality of web hooks is notifying your applications from changes in SharePoint they're interested in. There's no need anymore for your application to regularly poll for changes anymore as with web hooks your application will be notified (**push** model) whenever there's a change. Web hooks are not Microsoft specific, it rather is a universal web standard that's also being adopted by other vendors (e.g. WordPress, GitHub, MailChimp,...). Looking at the Microsoft world we also have web hooks in production for other Office 365 components like OneDrive and Outlook. In the upcoming chapters you'll learn how to add a web hook and how to correctly deal with web hook notifications that you'll get from SharePoint. 
+The key functionality of webhooks is notifying your applications from changes in SharePoint they're interested in. There's no need for your application to regularly poll for changes anymore as with webhooks your application will be notified (**push** model) whenever there's a change. Webhooks are not Microsoft specific, it rather is a universal web standard that's also being adopted by other vendors (e.g. WordPress, GitHub, MailChimp,...). 
 
-> **Important**
-- Web hooks are only fired after a change happened (so similar to **-ed** events), synchronous (**-ing** events) are not possible.
 
-If you want to learn more about the technical implementation of web hooks then reading [our technical documentation](https://github.com/SharePoint/sp-dev-docs/wiki/SharePoint-Webhooks "web hooks technical overview") is highly recommended. This sample is not a bare bones sample as it's meant to be a reference implementation. If you want to experiment with web hooks then you should also checkout our [basic tutorial](https://github.com/SharePoint/sp-dev-docs/wiki/Webhooks-Basic-Tutorial "Basic tutorial") for which we've also recorded [a web cast which is worth while checking out](https://www.youtube.com/watch?v=IbVlDkmsh8w "Getting started web cast").
-
+If you want to learn more about webhooks then feel free to also checkout: 
+ - [The webhook documentation](https://aka.ms/sp-webhooks-docs) 
+ - [A basic webhook tutorial](https://aka.ms/sp-webhooks-basic-tutorial)
 
 ### Adding a web hook to your SharePoint list ###
-To add a web hook your application first needs create a web hook subscription by **(step number 1)** by doing a `POST /_api/web/lists('list-id')/subscriptions` while specifying a payload that identifies the list which we're adding the web hook for, the location of our web hook service (see later) and the expiration date of the web hook. 
+This reference implementation interacts with a SharePoint list. To add a webhook to a SharePoint list, your application first needs to create a webhook subscription by doing a `POST /_api/web/lists('list-id')/subscriptions` while specifying a payload that identifies the list which we're adding the webhook for, the location of our webhook service and the expiration date of the webhook. 
 
-> **Important**
-- You need to specify the expiration date of your web hook and this can be maximum 6 months. Later on you'll learn how to prolong your web hook.
-
-Once you've requested SharePoint to add your web hook SharePoint will validate that your web hook service end point does exist **(step number 2)**. It will do this by sending a validation string to your service endpoint. SharePoint will expect that the endpoint returns the received validation string within 5 seconds. If this fails then the web hook creation is canceled. In you've deployed your service then this will work **(step number 3)** and SharePoint return a HTTP 201 message on the POST request you issued in step number 1. The payload of the returning message contains the ID of the web hook subscription...if you later on want to manipulate the web hook subscription you need this ID.
+Once you've requested SharePoint to add your webhook SharePoint will validate that your webhook service end point does exist. It will do this by sending a validation string to your service endpoint. SharePoint will expect that the endpoint returns the received validation string within 5 seconds. If this fails then the webhook creation is canceled. In you've deployed your service then this will work and SharePoint return a HTTP 201 message on the POST request you issued in step number 1. The payload of the returning message contains the ID of the webhook subscription. This is the ID of the subscription that was created.
 
 ![Adding a web hook](http://i.imgur.com/dWzS5nq.png)
 
@@ -87,16 +87,15 @@ private void Cc_ExecutingWebRequest(object sender, WebRequestEventArgs e)
 ```
 
 ### SharePoint calls out to your web hook service ###
-When SharePoint detects a change in a list for which you've subscribed a web hook you're service endpoint will be called by SharePoint **(step number 1)**. When you look at the payload that you'll get from SharePoint the following properties are important:
-- **subscriptionId**: this is the ID of the web hook subscription. If you for example want to prolong the web hook expiration you need this ID
-- **resource**: this is the ID of the list for which the change happened
-- **siteUrl**: is the server relative url of the site holding the resource for which the change happened
+When SharePoint detects a change in a list for which you've subscribed a webhook, you're service endpoint will be called by SharePoint. When you look at the payload that you'll get from SharePoint the following properties are important:
 
-> **Important**
-- SharePoint is only providing you that a change happened...not what actually was changed. Later on you'll see how to deal with this
-- Since you get information about the web and list that were changed it means that you can perfectly use the same service endpoint to handle web hook events from multiple sites and lists
+- **subscriptionId**: this is the ID of the webhook subscription. If you for example want to prolong the webhook expiration you need this ID.
+- **resource**: this is the ID of the list for which the change happened.
+- **siteUrl**: this is the server relative url of the site holding the resource for which the change happened.
 
-When your service is called it's important that you reply with a HTTP 200 message within less than 5 seconds **(step number 2)**. Later on in this article you'll learn more about the why but essentially this comes down to the fact that you need to **asynchronously** need to handle the notifications. In this sample we'll do this by using Azure Web Jobs and Azure Storage Queues.
+> **Note**: SharePoint is only providing you that a change happened, not what actually was changed. Since you get information about the web and list that were changed it means that you can perfectly use the same service endpoint to handle webhook events from multiple sites and lists.
+
+When your service is called it's important that you reply with a HTTP 200 message within less than 5 seconds. Later on in this article you'll learn more about the why but essentially this comes down to the fact that you need to **asynchronously** handle the notifications. In this sample we'll do this by using Azure Web Jobs and Azure Storage Queues.
 
 ![SharePoint calls your web hook endpoint](http://i.imgur.com/XaDhJQe.png)
 
@@ -107,11 +106,13 @@ In the previous step your service endpoint was called but SharePoint only provid
 
 You can learn more about the GetChanges() implementation in class `ChangeManager`, method `ProcessNotification` of the SharePoint.WebHooks.Common project. 
 
-> **Important**
-- To avoid getting the same change over and over again it's important that you tell SharePoint from which point you want the changes. This is done by passing a changeToken...which also implies that your service endpoint needs to persist the last used changeToken so that it can be used during the next time the service endpoint is called
-- SharePoint does not call your service in real-time: when a change happens on a list that has a web hook SharePoint will queue a web hook call out. Once each minute this queue will be read and the needed service endpoints are called. This batching of requests is important as it prevents SharePoint from calling your endpoint 1000 times when you for example bulk upload 1000 records in one shot. So your endpoint is only called once but when you do the `GetChanges()` call you'll get 1000 change events that you need to process.
+To avoid getting the same change over and over again it's important that you tell SharePoint from which point you want the changes. This is done by passing a changeToken...which also implies that your service endpoint needs to persist the last used changeToken so that it can be used during the next time the service endpoint is called.
 
-To guarantee an immediate response, regardless of the number of changes there, it's important that the 'workload' of your service endpoint is executed asynchronously. In this sample we leveraged the power of Azure: the service will serialize the incoming payload and store it an Azure Storage queue while there's an Azure web job that running continuously and checks for messages in the queue. When there are messages in the queue the web job will process them and as such will execute your logic in an asynchronous manner.
+Some key things to note here is that:
+
+- SharePoint does not call your service in real-time: when a change happens on a list that has a webhook SharePoint will queue a webhook call out. Once each minute this queue will be read and the needed service endpoints are called. This batching of requests is important as it prevents SharePoint from calling your endpoint 1000 times when you for example bulk upload 1000 records in one shot. So your endpoint is only called once but when you do the `GetChanges()` call you'll get 1000 change events that you need to process.
+- To guarantee an immediate response, regardless of the number of changes there, it's important that the 'workload' of your service endpoint is executed asynchronously. In this sample we leveraged the power of Azure: the service will serialize the incoming payload and store it an Azure Storage queue while there's an Azure web job that running continuously and checks for messages in the queue. When there are messages in the queue the web job will process them and as such will execute your logic in an asynchronous manner.
+
 
 ### Complete end-to-end flow
 Below diagram is showing the complete end-to-end web hook flow:
@@ -137,8 +138,9 @@ There are some key benefits in the web hook model that you should be aware of:
 
 
 ## How to deal with web hook renewal
-By now you've learned that the maximum lifetime of your web hook is 6 months. Often you want to web hook to be available for longer time and as such you need to implement logic for doing that. Below 2 patterns are good patterns, the first is lightweight, the second one is slightly more complex and requires an additional web job to be hosted:
-- **Basic model:** when your service receives a notification it also gets information about the subscription lifetime. If the subscription is about to expire then inside your notification processing logic you simply extend the lifetime of the subscription. This model is implemented in this sample and works fine for most cases but in case there's no change for 6 months on the list you've a web hook subscription for then the web hook subscription is never prolonged and will be dropped
+Webhook subscriptions are set to expire 6 months by default or at the specified date time from when they are created. Often you want the webhook to be available for longer time and as such you need to implement logic for doing that in your application. The patterns described below are good to start with. The first is lightweight and the second one is slightly more complex and requires an additional web job to be hosted:
+
+- **Basic model:** When your service receives a notification it also gets information about the subscription lifetime. If the subscription is about to expire then inside your notification processing logic you simply extend the lifetime of the subscription. This model is implemented in this sample and works fine for most cases but in case there's no change for 6 months on the list you've a web hook subscription for then the web hook subscription is never prolonged and will be dropped
 - **Reliable but more complex model:** you create a web job that on a weekly basis reads all the subscription ID's from the persistent storage and one by one extends the found subscriptions each time. Note that this web job is **not** part of this sample
 
 The actual renewal of web hooks can be done using a `PATCH /_api/web/lists('list-id')/subscriptions(‘subscriptionID’)` REST call. In the sample updating of web hooks is implemented in the `WebHookManager` class of the SharePoint.WebHooks.Common project. Updating a web hook is done using the `AddListWebHookAsync` method:
