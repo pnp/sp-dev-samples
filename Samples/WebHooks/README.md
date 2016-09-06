@@ -167,6 +167,6 @@ Since SharePoint is calling out to your web hook service endpoint it means that 
 - If you do not want to deploy your service during development time you'll need to use a secure tunnel for your service. The idea is that you tell SharePoint that the notification service lives on a shared public endpoint. Client side you install a component that connects to that shared public service and whenever a call is made to the public endpoint the client component is notified and it pushes the payload to your service running on localhost. ngrok (https://ngrok.com/) is an implementation of such a secure tunnel tool
 
 
-
+<img src="https://telemetry.sharepointpnp.com/sp-dev-samples/samples/webhooks" /> 
 
 
