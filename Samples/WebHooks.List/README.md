@@ -37,7 +37,7 @@ This sample application will show you how to manage webhooks, specifically manag
 Deploying this sample requires you to setup some Azure components which are described in depth in our [deployment guide](Deployment guide.md).
 
 ## Want to learn more about this sample ##
-This sample is part of the reference implementation walkthrough and as such we would like to point you to our [official documentation](https://aka.ms/sp-webhooks-sample-reference) to learn more about this sample.
+This sample is part of the reference implementation walkthrough and as such we would like to point you to our [official documentation](http://dev.office.com/sharepoint/docs/apis/webhooks/webhooks-reference-implementation) to learn more about this sample.
 
 
 
