@@ -8,7 +8,7 @@ This repo contains the samples around add-in/app model, webhooks and other relat
 
 * [SharePoint Development Center](http://dev.office.com/sharepoint)
 * [SharePoint Patterns and Practices](http://aka.ms/sppnp)
-* [Classic PnP repository for add-in samples](hhttps://github.com/OfficeDev/PnP)
+* [Classic PnP repository for add-in samples](http://github.com/OfficeDev/PnP)
 
 # Using the samples
 
