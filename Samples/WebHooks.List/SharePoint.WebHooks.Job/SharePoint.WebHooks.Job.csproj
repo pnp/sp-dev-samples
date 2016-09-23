@@ -114,9 +114,6 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
-    <None Include="Properties\PublishProfiles\pnpwebhookdemo - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\pnpwebhookdemo - Web Deploy.pubxml" />
-    <None Include="Properties\webjob-publish-settings.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharePoint.WebHooks.Common\SharePoint.WebHooks.Common.csproj">
