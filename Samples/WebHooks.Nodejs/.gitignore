@@ -1,0 +1,12 @@
+node_modules
+typings
+local-settings
+
+config.json
+
+public/webhook.txt
+
+*.js
+*.js.map
+*.pem
+*.log

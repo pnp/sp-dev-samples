@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Sample SharePoint Webhook Application</title>
+		<link rel="stylesheet" href="https://appsforoffice.microsoft.com/fabric/fabric-core/4.0.0/fabric.min.css">
+	</head>
+
+	<body class="ms-fontSize-m">
+		<div class="ms-Grid"> 
+			<div class="ms-Grid-row">
+				<div class="ms-Grid-col ms-u-sm12">
+					<h1 class="ms-font-xl">Sample SharePoint Webhook Application</h1>
+				</div>
+				<div class="ms-Grid-col ms-u-sm6">
+					<h2 class="ms-font-l">Create subscription</h2>
+					<a href="javascript:;" onclick="webhook.create()">Create a new subscription</a>
+
+					<h2 class="ms-font-l">All subscriptions</h2>
+					<div class="subList"></div>
+				</div>
+				<div class="ms-Grid-col ms-u-sm6">
+					<h2 class="ms-font-l">Webhook changes</h2>
+					<div class="subChanges"></div>
+				</div>
+			</div>
+		</div>
+		
+
+		<script>
+			var webhook = (function () {
+				var init = function () {
+					list();
+					getChanges();
+				};
+
+				var list = function () {
+					// Get the list with subscriptions
+					var req = new XMLHttpRequest();
+					req.onreadystatechange = function() {
+						if (req.readyState === 4 && req.status === 200) {
+							var res = JSON.parse(req.responseText);
+							var markup = [];
+							if (typeof res.value !== 'undefined' && res.value !== null) {
+								res.value.forEach(function (val) {
+									markup.push('<b>ID: ' + val.id  + '</b>');
+									markup.push('<ul>');
+									markup.push('<li>clientState: ' + val.clientState  + '</li>');
+									markup.push('<li>expirationDateTime: ' + val.expirationDateTime  + '</li>');
+									markup.push('<li>resource: ' + val.resource  + '</li>');
+									markup.push('<li>notificationUrl: ' + val.notificationUrl  + '</li>');
+									markup.push('<li>Update or remove: <a href="javascript:;" onclick="webhook.update(\'' + val.id + '\');return false;">update</a> / <a href="javascript:;" onclick="webhook.remove(\'' + val.id + '\');return false;">remove</a></li>');
+									markup.push('</ul>');
+								});
+							}
+							if (markup.length === 0) {
+								document.querySelector('.subList').innerHTML = 'No subscriptions for the list or library.';
+							} else {
+								document.querySelector('.subList').innerHTML = markup.join('');
+							}
+						}
+					};
+					req.open("GET", "http://localhost:3000/list", true);
+					req.send(null);
+				};	
+
+				var create = function () {
+					var req = new XMLHttpRequest();
+					req.onreadystatechange = function() {
+						if (req.readyState === 4 && req.status === 200) {
+							// Update the list
+							list();
+						}
+					}
+					req.open("GET", "http://localhost:3000/create", true);
+					req.send(null);
+				};			
+
+				var remove = function (id) {
+					if (id !== null) {
+						var req = new XMLHttpRequest();
+						req.onreadystatechange = function() {
+							if (req.readyState === 4 && req.status === 200) {
+								// Update the list
+								list();
+							}
+						}
+						req.open("GET", "http://localhost:3000/delete/" + id, true);
+						req.send(null);
+					}
+				};			
+
+				var update = function (id) {
+					if (id !== null) {
+						var req = new XMLHttpRequest();
+						req.onreadystatechange = function() {
+							if (req.readyState === 4 && req.status === 200) {
+								// Update the list
+								list();
+							}
+						}
+						req.open("GET", "http://localhost:3000/update/" + id, true);
+						req.send(null);
+					}
+				};
+
+				var setChangesTO = function () {
+					setTimeout(function () {
+						// Do a new call
+						getChanges();
+					}, 10000);
+				};
+
+				var getChanges = function () {
+					var req = new XMLHttpRequest();
+					req.onreadystatechange = function() {
+						if (req.readyState === 4 && req.status === 200) {
+							document.querySelector('.subChanges').innerHTML = req.responseText;
+							setChangesTO();
+						}
+					}
+					req.open("GET", "webhook.txt", true);
+					req.send(null);
+				};
+
+				return {
+					init: init,
+					create: create,
+					remove: remove,
+					update: update
+				};
+			})();
+
+			webhook.init();
+		</script>
+	</body>
+</html>
