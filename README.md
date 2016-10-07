@@ -1,6 +1,6 @@
 # SharePoint code samples for add-ins, webhooks and other APIs
 
-This repo contains the samples around add-in/app model, webhooks and other related APIs. 
+This repo contains the samples around add-in/app model, webhooks and other related APIs.
 
 > Note. If you are looking for SharePoint Framework client-side web part samples, those are located in different [repository](https://github.com/SharePoint/sp-dev-fx-webparts/). 
 
