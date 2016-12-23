@@ -3,12 +3,15 @@
 ## Summary
 Short summary on functionality and used technologies.
 
-[picture of the web part in action]
+[picture of the sample in action]
 
 ## Applies to
-
-* [SharePoint Framework Developer Preview](http://dev.office.com/sharepoint/docs/spfx/sharepoint-framework-overview)
-* [Office 365 developer tenant](http://dev.office.com/sharepoint/docs/spfx/set-up-your-developer-tenant)
+* SharePoint Online
+* SharePoint 2016
+* SharePoint 2013
+* SharePoint 2010
+* SharePoint 2007
+* SharePoint 2003
 
 > Update accordingly as needed.
 
@@ -42,14 +45,14 @@ Version|Date|Comments
   - `tsd install`
   - `gulp serve`
 
-> Include any additional steps as needed.
+> Update steps as needed.
 
 ## Features
-Description of the web part with possible additional details than in short summary. 
-This Web Part illustrates the following concepts on top of the SharePoint Framework:
+Additional details of the sample with possible additional details than in short summary. 
+This sample illustrates the following concepts on top of the SharePoint:
 
 - topic 1
 - topic 2
 - topic 3
 
-<img src="https://telemetry.sharepointpnp.com/sp-dev-fx-webparts/samples/readme-template" />
+<img src="https://telemetry.sharepointpnp.com/sp-dev-samples/samples/readme-template" />
