@@ -1,1 +1,0 @@
-This folder will contain SharePoint development related samples

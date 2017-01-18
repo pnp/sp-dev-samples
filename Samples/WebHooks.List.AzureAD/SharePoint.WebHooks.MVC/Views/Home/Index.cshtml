@@ -1,0 +1,106 @@
+﻿@model SharePoint.WebHooks.MVC.Models.SharePointSiteModel
+
+@{
+    ViewBag.Title = "Home Page";
+}
+
+@using (Html.BeginForm("Create", "Home", FormMethod.Post))
+{
+    <div class="row">
+        <h2>Existing web hooks for <a target="_blank" href="@Model.SharePointSite">@Model.SharePointSite</a></h2>
+
+        <table cellpadding="3">
+            <thead>
+                <tr>
+                    <th>Actions</th>
+                    <th>Subscription id</th>
+                    <th>List</th>
+                    <th>Webhook endpoint</th>
+                    <th>Webhook expires at</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.WebHooks.Count() == 0)
+                {
+                    <tr>
+                        <td colspan="5">There are currently no web hooks defined for the lists in this web!</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var webHook in Model.WebHooks)
+                    {
+                        var list = Model.Lists.Where(f => f.Id == new Guid(webHook.Resource)).FirstOrDefault();
+                        string listName = "";
+                        if (list != null)
+                        {
+                            listName = String.Format("{0} - {1}", list.Title, webHook.Resource);
+                        }
+
+                        <tr>
+                            <td>
+                                @Html.ActionLink("Delete", "Delete", "Home", new RouteValueDictionary(new { id = webHook.Id, listId = webHook.Resource }), null)
+                            </td>
+                            <td>@webHook.Id</td>
+                            <td> @{ @listName }</td>
+                            <td>@webHook.NotificationUrl</td>
+                            <td>@webHook.ExpirationDateTime</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        <br/>
+        <br/>
+        <h2>Add a new web hook</h2>
+        <table cellpadding="3">
+            <tr>
+                <td>Select a list:</td>
+                <td>@Html.DropDownListFor(m => m.SelectedSharePointList, new SelectList(Model.Lists, "Id", "Title", Model.SelectedSharePointList), new { @id = "ListDropDown" }) </td>
+                <td><input type="button" value="Create" id="btnCreate"/></td>
+                <td>
+                    <div id="workingOnIt" style="margin-left:10px; float:left">
+                        @Html.Partial("_WorkingOnIt")
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    @section Scripts {
+    <script>
+        function ShowDonut() {
+            $("#workingOnIt").show();
+        }
+
+        function HideDonut() {
+            $("#workingOnIt").hide();
+        }
+
+        $(document).ready(function () {
+
+            HideDonut();
+
+            $("#btnCreate").click(function (e) {
+                e.preventDefault();
+                ShowDonut();
+                $.post("/Home/Create",
+                        {
+                            selectedSharePointList: $('#ListDropDown option:selected').val()
+                        })
+                        .done(function () {
+                            window.location.href = "/Home/Index";
+                        })
+                        .fail(function () {
+                            HideDonut();
+                            alert("Error while posting back to SharePoint");
+                        });
+            });
+        });
+
+    </script>
+    }
+
+}
+
