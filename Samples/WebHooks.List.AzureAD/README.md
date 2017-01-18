@@ -1,14 +1,14 @@
-# SharePoint Web Hooks reference implementation #
+# SharePoint Web Hooks Azure AD reference implementation #
 
 ### Summary ###
-This SharePoint PnP reference implementation shows how you can you can make use of web hooks in your applications. The web hooks are implemented in an enterprise ready manner using various Azure components such as Azure Web Jobs, Azure SQL Server and Azure Storage Queues for asynchronous web job notification handling. If you want learn more about web hooks then you can continue reading but do know that we've also recorded a web cast which is available from the [SharePoint PnP YouTube Channel](https://www.youtube.com/watch?v=j3hWCAI9R20).
+This SharePoint PnP reference implementation shows how you can you can make use of web hooks in your applications. The web hooks are implemented in an enterprise ready manner using various Azure components such as Azure AD for authentication, Azure Web Jobs, Azure SQL Server and Azure Storage Queues for asynchronous web job notification handling. If you want learn more about web hooks then you can continue reading but do know that we've also recorded a web cast which is available from the [SharePoint PnP YouTube Channel](https://www.youtube.com/watch?v=j3hWCAI9R20).
 
 <a href="https://www.youtube.com/watch?v=j3hWCAI9R20">
 <img src="http://i.imgur.com/0tqP0kO.png" alt="PnP webcast - Introducing SharePoint webhooks" />
 </a>
 
 ### Applies to ###
-- Office 365 Multi Tenant (MT) with [First Release enabled](https://support.office.com/en-us/article/Set-up-the-Standard-or-First-Release-options-in-Office-365-3b3adfa4-1777-4ff0-b606-fb8732101f47).
+- Office 365 Multi Tenant (MT).
 
 ### Prerequisites ###
 Microsoft Azure is used to host the various components needed to implement Azure Web Hooks.
@@ -16,12 +16,12 @@ Microsoft Azure is used to host the various components needed to implement Azure
 ### Solution ###
 Solution | Author(s)
 ---------|----------
-SharePoint.WebHooks | Bert Jansen (**Microsoft**)
+SharePoint.WebHooks.AzureAD | Bert Jansen (**Microsoft**)
 
 ### Version history ###
 Version  | Date | Comments
 ---------| -----| --------
-1.0  | August 11th 2016 | Initial release
+1.0  | January 18th 2017 | Initial release
 
 ### Disclaimer ###
 **THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.**

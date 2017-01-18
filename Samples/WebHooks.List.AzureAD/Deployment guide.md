@@ -1,4 +1,4 @@
-# SharePoint web hooks reference implementation - Deployment guide #
+# SharePoint web hooks Azure AD reference implementation - Deployment guide #
 This guide will provide you step by step guidance on how to deploy this sample application. We'll first start with preparing the Azure resources, then we'll prep the application and SharePoint needs and finally we'll show you how to deploy the needed components.
 
 ## Preparing Microsoft Azure for hosting the web hook sample application
@@ -70,22 +70,172 @@ Remember the name of the server you've chosen
 > **Important**
 Remember the storage account connection string
 
-## Preparing SharePoint to host the application
+### Creating the Azure AD application
+#### Create the self signed certificate
+You are now ready to configure the Azure AD Application for invoking SharePoint Online with an App Only access token. In order to do that, you have to create and configure a self-signed X.509 certificate, which will be used to authenticate your Application against Azure AD, while requesting the App Only access token. 
 
-1) Browse to the site you want to deploy the application on and create a new principal via hitting the appregnew.aspx page. You can generate the client id and secret, give it a title and define the app domain being the Azure Web app you've created earlier on (pnpwebhookdemo.azurewebsites.net) and finally enter the redirect url (https://pnpwebhookdemo.azurewebsites.net in this case).
+First of all, you have to create the self-signed X.509 Certificate, which can be created using the [makecert.exe](https://msdn.microsoft.com/library/windows/desktop/aa386968.aspx) tool that is available in the Windows SDK or through a provided PowerShell script which does not have a dependency to makecert. Using the PowerShell script is the preferred method.
 
-![Appregnew](http://i.imgur.com/Rn4gFG3.png)
+**Important:** 
+It's important that you run the below scripts with Administrator privileges.
 
-> **Important**
-Remember the client id and client secret
+##### Using the Create-SelfSignedCertificate PowerShell Script
+You can use a provided PowerShell script which does not have a dependency to makecert.exe. The script is called <a href="../scripts/Create-SelfSignedCertificate.ps1">Create-SelfSignedCertificate.ps1</a> and is available in the <a href="../scripts/">Scripts folder</a> of this repository.
 
-2) Verify you can access your applications app catalog which you can reach via your SharePoint Administration site
+To create a self signed certificate with this script:
 
-![Go to the app catalog](http://i.imgur.com/lgt7zF6.png)
+```PowerShell
+.\Create-SelfSignedCertificate.ps1 -CommonName "MyCompanyName" -StartDate 2015-10-25 -EndDate 2016-10-25
+```
 
-2.1) If you do not yet have an app catalog then create one
+You will be asked to provide a password to encrypt your private key, and both the .PFX file and .CER file will be exported to the current folder.
 
-![Create a new app catalog](http://i.imgur.com/j2vmPIb.png)
+##### Using makecert (alternative manual option)
+Alternatively, if you have Microsoft Visual Studio 2013/2015 installed on your enviroment, you already have the [makecert tool](https://msdn.microsoft.com/library/windows/desktop/aa386968.aspx), as well. Otherwise, you will have to download from MSDN and to install the Windows SDK for your current version of Windows Operating System.
+
+The command for creating a new self-signed X.509 certificate is the following one:
+
+```
+makecert -r -pe -n "CN=MyCompanyName MyAppName Cert" -b 10/25/2015 -e 10/25/2016 -ss my -len 2048
+```
+
+The previous command creates a self-signed certificate with a common name (CN) value of "MyCompanyName MyAppName Cert", a validity timeframe between 10/25/2015 and 10/25/2016, and a key length of 2048 bit. The certificate will have an exportable private key and will be stored in the personal certificate store of the current user. 
+
+>For further details about the makecert syntax and command line parameters you can read <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa386968(v=vs.85).aspx">the following article</a> on MSDN.
+
+After having created the self-signed X.509 Certificate you have to export it as a .PFX file, which includes the private key value. In order to do that, run the **mmc.exe** command as an Administrator (RunAs Admin) and add the **Certificates MMC** snap-in, targeting the personal store of the current user. In the Current User's Personal folder of Certificates, select the just created certificate, right click on it and select the "Export" functionality. Select to export the private key into a .PFX file. Provide a password to protect the private key of the certificate. Repeat the same process as before, but this time export the certificate as a .CER file, which does not include the private key value.
+
+#### App Only certificate configuration in the Azure Web Application
+You will need to upload the .PFX file of the self-signed certificate to create the App Only context. Thus, go into the **"Configuration"** tab and add a new X.509 certificate to the Azure Web App, through the proper configuration section. Alternatively through the new Azure Portal you will go into the App Service, click on **"SSL certificates"**, click on the **"Upload Certificate"** menu at the top, select the PFX certificate that you have created earlier on in these steps and click on **"Upload"**.
+
+![Azure App Service - X.509 Certificate](http://i.imgur.com/3QQf0yt.png)
+
+After that, scroll a little bit to the "Application Settings" section. There, you will have to configure the following settings:
+- *WEBSITE_LOAD_CERTIFICATES* with a value of *;
+- *WEBJOBS_IDLE_TIMEOUT* with a value of 10000;
+- *SCM_COMMAND_IDLE_TIMEOUT* with a value of 10000;
+
+In the following figure you can see a sample configuration. 
+![Azure App Service - SSL Certificates Setting](http://i.imgur.com/P0S4wh5.png)
+
+"WEBSITE_LOAD_CERTIFICATES" allows the Azure App Service to access the service account's personal certificate store to read the App Only X.509 certificate. The last two properties allow the web jobs to run for longer than 2 minutes.
+
+#### Azure Active Directory Application registration
+First of all, because the this application is an Office 365 Application, you have to **register it in the Azure Active Directory tenant** that is linked to your Office 365 tenant. In order to do that, open the Office 365 Admin Center (https://portal.office.com) using the account of a user member of the Tenant Global Admins group.
+
+Click on the "Azure AD" link that is available under the "Admin centers" group in the left-side treeview of the Office 365 Admin Center. In the new browser's tab that will be opened you will find the Microsoft Azure Management Portal. If it is the first time that you access the Azure Management Portal with your account, you will have to register a new Azure subscription, providing some information and a credit card for any payment need. But don't worry, in order to play with Azure AD and to register an Office 365 Application you will not pay anything. In fact, those are free capabilities. 
+
+Once having access to the Azure Management Portal, select the "Active Directory" section, by clicking on the icon highlighted in the following screen shot:
+
+![Azure AD Button](http://i.imgur.com/OrNF2bz.png)
+
+If you can't see Azure Active Directory as one of your options then scroll to the end of the left menu and click on "More Services". You'll find "Azure Active Directory"  there. Please favorite the feature as you'll need this later.
+
+You'll see on the left side of the blade that you opened the Azure AD tenant corresponding to your Office 365 tenant. Locate and select the option "App Registrations". See the next figure for further details.
+
+![Azure AD Main Page](http://i.imgur.com/ROf6qkd.png)
+
+In the "App Registrations" tab you will find the list of Azure AD applications registered in 
+your tenant. Click the "Add" button in the upper left part of the blade, this will show you the following screen.
+
+![Azure AD - Add an Application - First Step](http://i.imgur.com/ziTWo0E.png)
+
+Then, provide a **name** for your application (we suggest to name it "SharePoint WebHook MVC app"), select the option **"Web app / API"**, and fill in the **"Sign-on URL"** with the **URL** of the Azure App Service that you created before. Click create when done.
+
+The newly created app registration will now be listed in your "App Registrations" list.
+Open it and then click into settings and then Properties.  You should now be at the following screen: 
+
+![Azure AD - Add an Application - Third Step](http://i.imgur.com/ZnmydCh.png)
+
+Please make sure you :
+- Copy the **Aplication ID** value as you'll need it later.
+- Provide the **App ID URI** value like https://<your tenant>.onmicrosoft.com/SharePoint.Webhooks.AzureAD
+- Press save. 
+
+Now, you should go back to the settings blade. Go into **Keys** where you'll create a Client Secret. In order to do that, add a new security key (selecting 1 year, 2 years or never for key expiration). Press the "Save" button in the lower part of the screen to generate the key value. After saving, you will see the key value. **Copy it in a safe place**, because you will not see it anymore.
+
+![Azure AD - Create a client Secret](http://i.imgur.com/Mw1dTSc.png)
+
+Now click on "Required Permissions", and click on the "Add" button, a new blade will appear.
+![Azure AD - Application - Required Permissions](http://i.imgur.com/gRJQf8e.png)
+
+You need to configure the following permissions:
+* Microsoft Graph (**Delegated Permission**)
+  * **Read directory data**
+  * **Read all users' basic profiles**
+  * **Read and write access to user profile**
+* Windows Azure Active Directory (**Delegated Permission**)
+  * **Sign in and read user profile**
+* Office 365 SharePoint Online (**Delegated Permission**)
+  * **Have full control of all site collections**
+* Office 365 SharePoint Online (**Application Permission**)
+  * **Have full control of all site collections**
+
+  For further details, see the following figure.
+![Azure AD - Application Configuration - Permissions Blade](http://i.imgur.com/kCX2PtI.png)
+
+The "Application Permissions" are those granted to the application when running as App Only. The other set of permissions, called "Delegated Permissions", defines the permissions granted to the application when running under a specific user's account delegation (using an app and user access token, from an OAuth 2.0 perspective).
+
+#### Update Azure AD Application manifest
+
+You can execute the <a href="../scripts/Get-SelfSignedCertificateInformation.ps1">Get-SelfSignedCertificateInformation.ps1</a> script. This script is available in the 
+<a href="../scripts/">Scripts folder</a> of this repository:
+
+```PowerShell
+.\Get-SelfSignedCertificateInformation.ps1 | clip
+```
+
+You will have to provide the path of the .CER file that you created before, when you created the certificate for the AppOnly context configuration.
+The command will copy into the clipboard a JSON snippet that you will use in the upcoming steps. Paste the content of the clipboard in a safe place (like a fresh new notepad file).
+Notice that the command will also provide the certificate thumbprint needed for configuration later in the document.
+
+Alternatively, start a PowerShell command window, and execute the following instructions:
+
+```PowerShell
+$certPath = Read-Host "Enter certificate path (.cer)"
+$cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+$cert.Import($certPath)
+$rawCert = $cert.GetRawCertData()
+$base64Cert = [System.Convert]::ToBase64String($rawCert)
+$rawCertHash = $cert.GetCertHash()
+$base64CertHash = [System.Convert]::ToBase64String($rawCertHash)
+$KeyId = [System.Guid]::NewGuid().ToString()
+
+$keyCredentials = 
+'"keyCredentials": [
+    {
+      "customKeyIdentifier": "'+ $base64CertHash + '",
+      "keyId": "' + $KeyId + '",
+      "type": "AsymmetricX509Cert",
+      "usage": "Verify",
+      "value":  "' + $base64Cert + '"
+     }
+  ],'
+$keyCredentials
+
+Write-Host "Certificate Thumbprint:" $cert.Thumbprint
+```
+
+Copy the output value into a text file as you will have to use it soon. Note that in case of the last approach you'll need to remove the carriage returns in the copied **value** element data.
+
+Go back to the Azure AD Application that you created in the previous step and click the **"Manifest"** button at the top of the blade, then click **Edit'**. Search for the **keyCredentials** property and replace it with the snippet you generated before, this will be similar to:
+
+```JSON
+  "keyCredentials": [
+    {
+      "customKeyIdentifier": "<$base64CertHash>",
+      "keyId": "<$KeyId>",
+      "type": "AsymmetricX509Cert",
+      "usage": "Verify",
+      "value":  "<$base64Cert>"
+     }
+  ],
+```
+
+Click **Save** when you complete this step.
+
+>For further details about running App Only applications, you can read <a href="http://blogs.msdn.com/b/richard_dizeregas_blog/archive/2015/05/03/performing-app-only-operations-on-sharepoint-online-through-azure-ad.aspx">the following article
+>from Richard diZerega</a>.
 
 ## Prepare the application
 ### Configure the SQL Azure database
@@ -146,63 +296,92 @@ EXEC sp_addrolemember 'db_datawriter', 'WebHooksAdmin'
 ```
 
 ### Update the configuration files (web.config and app.config)
-Update the web.config file from the SharePoint.WebHooks.MVCWeb project as shown below:
+Update the web.config file from the SharePoint.WebHooks.MVC project as shown below:
 
 ```XML
 <appSettings>
-    <add key="webpages:Version" value="3.0.0.0" />
-    <add key="webpages:Enabled" value="false" />
-    <add key="ClientValidationEnabled" value="true" />
-    <add key="UnobtrusiveJavaScriptEnabled" value="true" />
-    <!-- Add here a client id and secret for a principal that you grant permissions the needed permissions to the site you're installing this app to
-    e.g. d54d2421-b7d5-44b5-b310-800f198f649b
-    -->
-    <add key="ClientId" value="<ADD THE CLIENT ID>" />
-	<!-- e.g.RCmuPd9Y+JxGy5x6k1M0wdxxxxxxxx-->
-    <add key="ClientSecret" value="<ADD THE CLIENT SECRET>" />
-    <!-- Connection string to Azure storage account: we use a queue for async processing of web hook notifications 
-         e.g. efaultEndpointsProtocol=https;AccountName=pnpwebhooksdemo;AccountKey=lG+wBesZObYg8r1pfHHZWf+XtjFuG+4EAHxxxxxx -->
-    <add key="StorageConnectionString" value="<ADD THE CONNECTION STRING FOR STORAGE ACCOUNT>" />
-    <!-- Name of your tenant e.g. contoso.sharepoint.com -->
-    <add key="TenantName" value="<YOUR TENANT NAME>.sharepoint.com" />
-    <!-- Url of your web hook service e.g https://pnpwebhookdemo.azurewebsites.net/api/webhook -->
-    <add key="WebHookEndPoint" value="https://<ADD AZURE WEB APP NAME>.azurewebsites.net/api/webhook" />
-  </appSettings>
-  <connectionStrings>
-    <!-- SQL Azure version -->
-    <!-- We need to store the last used change token per subscription and use an Azure SQL database for doing so 
+  <!-- MVC settings-->
+  <add key="webpages:Version" value="3.0.0.0" />
+  <add key="webpages:Enabled" value="false" />
+  <add key="aspnet:UseTaskFriendlySynchronizationContext" value="true" />
+  <add key="ClientValidationEnabled" value="true" />
+  <add key="UnobtrusiveJavaScriptEnabled" value="true" />
+  
+  <!-- Azure AD settings-->
+  <add key="ida:GraphResourceId" value="https://graph.windows.net" />
+  <!-- ClientID and Secret from your Azure AD application -->  
+  <add key="ida:ClientId" value="<YOUR AZURE AD APPLICATION ID>" />
+  <add key="ida:AppKey" value="<YOUR AZURE AD APPLICATION SECRET>" />
+  <!-- Name of your tenant e.g. contoso.onmicrosoft.com -->
+  <add key="ida:Tenant" value="<YOUR TENANT NAME>.onmicrosoft.com" />
+  <add key="ida:AADInstance" value="https://login.microsoftonline.com/{0}" />
+  <!-- Url of your web hook service e.g https://pnpwebhookdemoaad.azurewebsites.net/api/webhook -->
+  <add key="ida:RedirectUri" value="https://<ADD AZURE WEB APP NAME>.azurewebsites.net/" />
+
+  <!-- Application specific settings -->
+  <!-- Connection string to Azure storage account: we use a queue for async processing of web hook notifications 
+         e.g. DefaultEndpointsProtocol=https;AccountName=pnpwebhooksdemo;AccountKey=lG+wBesZObYg8r1pfHHZWf+XtjFuG+4EAHxxxxxx -->
+  <add key="StorageConnectionString" value="<ADD THE CONNECTION STRING FOR STORAGE ACCOUNT>" />
+  <!-- Name of your tenant e.g. contoso.sharepoint.com -->
+  <add key="TenantName" value="<YOUR TENANT NAME>.sharepoint.com" />
+  <!-- Name of your site collection that you want to use for web hook experimenting -->
+  <add key="SiteCollection" value="/sites/<YOUR SITECOLLECTION>" />
+  <!-- Url of your web hook service e.g https://pnpwebhookdemoaad.azurewebsites.net/api/webhook -->
+  <add key="WebHookEndPoint" value="https://<ADD AZURE WEB APP NAME>.azurewebsites.net/api/webhook" />
+  <!-- Location of the certificate used to perform "app-only" authentication towards SharePoint Online using Azure AD authentication -->
+  <add key="CertificateStore" value="My" />
+  <add key="CertificateLocation" value="CurrentUser" />
+  <add key="CertificateThumbprint" value="<YOUR CERTIFICATE THUMPRINT>" />
+</appSettings>
+<connectionStrings>
+  <!-- SQL Azure version -->
+  <!-- We need to store the last used change token per subscription and use an Azure SQL database for doing so 
 	e.g. metadata=res://*/SQL.ListWebHooks.csdl|res://*/SQL.ListWebHooks.ssdl|res://*/SQL.ListWebHooks.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=tcp:xxx.database.windows.net,1433;Database=PnPWebHookDemo;User ID=WebHooksAdmin;Password=xxxx;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True;App=EntityFramework&quot;" providerName="System.Data.EntityClient
 	-->
-    <add name="SharePointWebHooks" connectionString="metadata=res://*/SQL.ListWebHooks.csdl|res://*/SQL.ListWebHooks.ssdl|res://*/SQL.ListWebHooks.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=tcp:<YOUR SQL SERVER>.database.windows.net,1433;Database=<YOUR DATABASE NAME>;User ID=<YOUR USER ID>;Password=<YOUR PASSWORD>;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True;App=EntityFramework&quot;" providerName="System.Data.EntityClient" />
-    <!-- Local dev version -->
-    <!--<add name="SharePointWebHooks" connectionString="metadata=res://*/SQL.ListWebHooks.csdl|res://*/SQL.ListWebHooks.ssdl|res://*/SQL.ListWebHooks.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=(localdb)\MSSQLLocalDB;initial catalog=SharePointWebHooks;integrated security=True;multipleactiveresultsets=True;application name=EntityFramework&quot;" providerName="System.Data.EntityClient" />-->
-    <!-- The format of the connection string is "DefaultEndpointsProtocol=https;AccountName=NAME;AccountKey=KEY" -->
-    <!-- For local execution, the value can be set either in this config file or through environment variables -->
-    <add name="AzureWebJobsDashboard" connectionString="<ADD THE CONNECTION STRING FOR STORAGE ACCOUNT>" />
-    <add name="AzureWebJobsStorage" connectionString="<ADD THE CONNECTION STRING FOR STORAGE ACCOUNT>" />
-  </connectionStrings>
+  <add name="SharePointWebHooks" connectionString="metadata=res://*/SQL.ListWebHooks.csdl|res://*/SQL.ListWebHooks.ssdl|res://*/SQL.ListWebHooks.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=tcp:<YOUR SQL SERVER>.database.windows.net,1433;Database=<YOUR DATABASE NAME>;User ID=<YOUR USER ID>;Password=<YOUR PASSWORD>;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True;App=EntityFramework&quot;" providerName="System.Data.EntityClient" />
+  <!-- Local dev version -->
+  <!--<add name="SharePointWebHooks" connectionString="metadata=res://*/SQL.ListWebHooks.csdl|res://*/SQL.ListWebHooks.ssdl|res://*/SQL.ListWebHooks.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=(localdb)\MSSQLLocalDB;initial catalog=SharePointWebHooks;integrated security=True;multipleactiveresultsets=True;application name=EntityFramework&quot;" providerName="System.Data.EntityClient" />-->
+  <!-- The format of the connection string is "DefaultEndpointsProtocol=https;AccountName=NAME;AccountKey=KEY" -->
+  <!-- For local execution, the value can be set either in this config file or through environment variables -->
+  <add name="AzureWebJobsDashboard" connectionString="<ADD THE CONNECTION STRING FOR STORAGE ACCOUNT>" />
+  <add name="AzureWebJobsStorage" connectionString="<ADD THE CONNECTION STRING FOR STORAGE ACCOUNT>" />
+</connectionStrings>
+
 ```
 
 Update the app.config file from the SharePoint.WebHooks.Job project as shown below:
 
 ```XML
-<appSettings>
-    <!-- Add here a client id and secret for a principal that you grant permissions the needed permissions to the site you're installing this app to
-    e.g. d54d2421-b7d5-44b5-b310-800f198f649b
-    -->
-    <add key="ClientId" value="<ADD THE CLIENT ID>" />
-	<!-- e.g.RCmuPd9Y+JxGy5x6k1M0wdxxxxxxxx-->
-    <add key="ClientSecret" value="<ADD THE CLIENT SECRET>" />
+  <appSettings>
+    <!-- Azure AD settings-->
+    <add key="ida:GraphResourceId" value="https://graph.windows.net" />
+    <!-- ClientID and Secret from your Azure AD application -->  
+    <add key="ida:ClientId" value="<YOUR AZURE AD APPLICATION ID>" />
+    <add key="ida:AppKey" value="<YOUR AZURE AD APPLICATION SECRET>" />
+    <!-- Name of your tenant e.g. contoso.onmicrosoft.com -->
+    <add key="ida:Tenant" value="<YOUR TENANT NAME>.onmicrosoft.com" />
+    <add key="ida:AADInstance" value="https://login.microsoftonline.com/{0}" />
+    <!-- Url of your web hook service e.g https://pnpwebhookdemoaad.azurewebsites.net/api/webhook -->
+    <add key="ida:RedirectUri" value="https://<ADD AZURE WEB APP NAME>.azurewebsites.net/" />
+
+    <!-- Application specific settings -->
+    <!-- Connection string to Azure storage account: we use a queue for async processing of web hook notifications 
+         e.g. DefaultEndpointsProtocol=https;AccountName=pnpwebhooksdemo;AccountKey=lG+wBesZObYg8r1pfHHZWf+XtjFuG+4EAHxxxxxx -->
+    <add key="StorageConnectionString" value="<ADD THE CONNECTION STRING FOR STORAGE ACCOUNT>" />
     <!-- Name of your tenant e.g. contoso.sharepoint.com -->
     <add key="TenantName" value="<YOUR TENANT NAME>.sharepoint.com" />
-    <!-- Url of your web hook service e.g https://pnpwebhookdemo.azurewebsites.net/api/webhook -->
+    <!-- Url of your web hook service e.g https://pnpwebhookdemoaad.azurewebsites.net/api/webhook -->
     <add key="WebHookEndPoint" value="https://<ADD AZURE WEB APP NAME>.azurewebsites.net/api/webhook" />
+    <!-- Location of the certificate used to perform "app-only" authentication towards SharePoint Online using Azure AD authentication -->
+    <add key="CertificateStore" value="My" />
+    <add key="CertificateLocation" value="CurrentUser" />
+    <add key="CertificateThumbprint" value="<YOUR CERTIFICATE THUMPRINT>" />
   </appSettings>
   <connectionStrings>
     <!-- SQL Azure version -->
     <!-- We need to store the last used change token per subscription and use an Azure SQL database for doing so 
-	e.g. metadata=res://*/SQL.ListWebHooks.csdl|res://*/SQL.ListWebHooks.ssdl|res://*/SQL.ListWebHooks.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=tcp:xxx.database.windows.net,1433;Database=PnPWebHookDemo;User ID=WebHooksAdmin;Password=xxxx;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True;App=EntityFramework&quot;" providerName="System.Data.EntityClient
-	-->
+	       e.g. metadata=res://*/SQL.ListWebHooks.csdl|res://*/SQL.ListWebHooks.ssdl|res://*/SQL.ListWebHooks.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=tcp:xxx.database.windows.net,1433;Database=PnPWebHookDemo;User ID=WebHooksAdmin;Password=xxxx;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True;App=EntityFramework&quot;" providerName="System.Data.EntityClient
+	   -->
     <add name="SharePointWebHooks" connectionString="metadata=res://*/SQL.ListWebHooks.csdl|res://*/SQL.ListWebHooks.ssdl|res://*/SQL.ListWebHooks.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=tcp:<YOUR SQL SERVER>.database.windows.net,1433;Database=<YOUR DATABASE NAME>;User ID=<YOUR USER ID>;Password=<YOUR PASSWORD>;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True;App=EntityFramework&quot;" providerName="System.Data.EntityClient" />
     <!-- Local dev version -->
     <!--<add name="SharePointWebHooks" connectionString="metadata=res://*/SQL.ListWebHooks.csdl|res://*/SQL.ListWebHooks.ssdl|res://*/SQL.ListWebHooks.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=(localdb)\MSSQLLocalDB;initial catalog=SharePointWebHooks;integrated security=True;multipleactiveresultsets=True;application name=EntityFramework&quot;" providerName="System.Data.EntityClient" />-->
@@ -223,11 +402,10 @@ Update the app.config from the SharePoint.WebHooks.Common project as shown below
   </connectionStrings>
 ```
 
-
 ## Deploy the application
 
-### Deploy the SharePoint Add-In - deploying to Azure
-1) Right click on the SharePoint.WebHooks.MVCWeb project and choose publish
+### Deploy the MVC Web Application - deploying to Azure
+1) Right click on the SharePoint.WebHooks.MVC project and choose publish
 
 ![Deploy the MVC app](http://i.imgur.com/AlOI9eI.png)
 
@@ -242,23 +420,6 @@ Update the app.config from the SharePoint.WebHooks.Common project as shown below
 4) Choose the **Debug** configuration (at least if you want to remotely debug), select the created database and click on **Publish**
 
 ![Finalize the configuration and publish](http://i.imgur.com/ZQS79SP.png)
-
-### Deploy the SharePoint Add-In - deploying to SharePoint
-1) Right click on the SharePoint.WebHooks.MVC project and choose publish
-
-![Publish the SharePoint part](http://i.imgur.com/h8DVwI1.png)
-
-2) Select **Package the add-in**
-
-![Package the add-in](http://i.imgur.com/isTXecw.png)
-
-3) Add your client id
-
-![Add your client id](http://i.imgur.com/euVFVVy.png)
-
-4) Upload the created app package to the tenant app catalog
-
-![Upload to tenant app catalog](http://i.imgur.com/T3WbCWz.png)
 
 ### Deploy the Azure web job
 1) Right click on the SharePoint.WebHooks.Job project and choose **Publish as Azure WebJob**
@@ -284,19 +445,6 @@ Update the app.config from the SharePoint.WebHooks.Common project as shown below
 6) Go to Azure management portal and verify the web job is created and in running state
 
 ![Verify in Azure management portal](http://i.imgur.com/EsJE5rs.png)
-
-### Add the application to your SharePoint site
-1) Add the add-in to your site via **site contents**
-
-![Add an add-in](http://i.imgur.com/pMvnJGZ.png)
-
-2) Select the correct add-in to add
-
-![Choose your add-in](http://i.imgur.com/S3ArAZ4.png)
-
-3) The add-in will need to be trusted upon installation. Note that it can take a few minutes before the add-in installation is complete, please wait a bit before testing it.
-
-![Trust the add-in](http://i.imgur.com/8SOzJ0Y.png)
 
 **Congrats!! You've completed the installation of this sample.**
 
