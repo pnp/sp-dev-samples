@@ -8,7 +8,7 @@ This SharePoint PnP reference implementation shows how you can you can make use 
 </a>
 
 ### Applies to ###
-- Office 365 Multi Tenant (MT) with [First Release enabled](https://support.office.com/en-us/article/Set-up-the-Standard-or-First-Release-options-in-Office-365-3b3adfa4-1777-4ff0-b606-fb8732101f47).
+- Office 365 Multi Tenant (MT).
 
 ### Prerequisites ###
 Microsoft Azure is used to host the various components needed to implement Azure Web Hooks.
