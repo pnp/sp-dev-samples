@@ -29,7 +29,7 @@ In our case we want this Azure Function to behave as a SharePoint webhook servic
 - Return the validationtoken if specified as URL parameter to the call
 - Store the JSON message in a storage queue so that our Azure Web Job can pick it up and process it
 
-You can achieve above by replacing the default code by below code:
+You can achieve above by replacing the default code by below code (please enter your storage account connection string and update the queue name if you're using a different one):
 
 ```C#
 #r "Newtonsoft.Json"
@@ -74,7 +74,7 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
         log.Info($"Processing notifications...");
         foreach(var notification in notifications)
         {
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=webhookdemo;AccountKey=5qQay3ufsy+8M9D+0T95JF/SGfoFYfALlnLzryKMJr3yGPg4YUqPtOIC2cDXRJ753L2PaVEstFtCGF6v4uWq4A==");
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse("<YOUR STORAGE ACCOUNT>");
             // Get queue... create if does not exist.
             CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
             CloudQueue queue = queueClient.GetQueueReference("sharepointlistwebhookeventazuread");
