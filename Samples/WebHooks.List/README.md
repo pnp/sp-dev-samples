@@ -34,7 +34,7 @@ This sample application will show you how to manage webhooks, specifically manag
 
 ![SharePoint Web Hook sample application](http://i.imgur.com/iJO6ukm.png)
 
-Deploying this sample requires you to setup some Azure components which are described in depth in our [deployment guide](Deployment guide.md).
+Deploying this sample requires you to setup some Azure components which are described in depth in our [deployment guide](Deployment guide.md). The deployment guide shows you how to use a Web API function as webhook service, but if you're more interested in use Azure functions then checkout the [Azure Functions guide](azure functions guide.md) for more details.
 
 ## Want to learn more about this sample ##
 This sample is part of the reference implementation walkthrough and as such we would like to point you to our [official documentation](http://dev.office.com/sharepoint/docs/apis/webhooks/webhooks-reference-implementation) to learn more about this sample.
