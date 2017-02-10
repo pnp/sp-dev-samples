@@ -19,6 +19,7 @@ Webhook.Nodejs | Elio Struyf (MVP, Ventigrate, [@eliostruyf](https://twitter.com
 Version  | Date | Comments
 ---------| -----| --------
 1.0.0  | September 27, 2016 | Initial release
+1.0.1  | February 10, 2017 | Small improvements in docs and packages
 
 ### Disclaimer
 **THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.**
@@ -31,7 +32,7 @@ You will need to register an Azure AD application with *application permissions*
 
 ### Azure AD application and certificate configuration
 - Create a new Azure AD application
-- Give the application the following permissions: **Read and write items in all site collections**
+- Give the application the following permissions: **Read and write items and lists in all site collections**
 
 ![Read & Write permissions](./assets/azure-ad-permissions.png)
 
