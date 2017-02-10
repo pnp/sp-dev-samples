@@ -5,7 +5,8 @@ var gulp = require('gulp'),
 gulp.task('default', ['typescript'], () => {});
 
 gulp.task('typescript', () => {
-    gulp.src('./src/**/*.ts')
+    var tsProject = ts.createProject('./tsconfig.json');
+    return tsProject.src()
         .pipe(sourcemaps.init())
         .pipe(ts())
         .pipe(sourcemaps.write('maps'))
