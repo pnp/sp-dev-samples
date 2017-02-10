@@ -88,13 +88,13 @@ export default class ChangeHelper {
                             console.log(res.statusCode, JSON.parse(body));
                             resolve(null);
                         }
-                        
+
                         let changes = [];
 
                         // Check if there is no error in the body
                         if (body.indexOf('odata.error') === -1) {
                             let result = JSON.parse(body);
-                            if (result.value.length > 0) {   
+                            if (result.value.length > 0) {
                                 result.value.forEach((resVal: ISPChangeItem) => {
                                     let change = {
                                         "ItemId": resVal.ItemId,
@@ -126,8 +126,7 @@ export default class ChangeHelper {
         return new Promise((resolve, reject) => {
             // Get site url
             let siteUrl = this.config.webhookConfig.url;
-            siteUrl = siteUrl.substring(0, (siteUrl.indexOf(subVal.siteUrl) + subVal.siteUrl.length));
-
+            
             // Get the absolute web url
             request({
                 uri: `${siteUrl}/_api/web/webs?$filter=ID eq guid'${subVal.webId}'&$select=Url`,
@@ -146,9 +145,12 @@ export default class ChangeHelper {
                 if (typeof result.value !== "undefined" && result.value !== null) {
                     // Retrieved value sample: '{"value":[{"Url":"https://..."}]}'
                     let webVal = result.value;
-                    if (webVal.length > 0){
+                    if (webVal.length > 0) {
                         resolve(webVal[0]);
                     } else {
+                        if (this.config.webhookConfig.url.indexOf(subVal.siteUrl) !== -1) {
+                            resolve({ Url: siteUrl });
+                        }
                         resolve(null);
                     }
                 }
