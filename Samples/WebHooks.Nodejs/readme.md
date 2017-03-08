@@ -2,7 +2,7 @@
 
 ## Summary
 
-Sample Node.js webhook application for Sharepoint. This application allows you to manage all subscriptions for a specific list or library and shows you the webhook changes when they happen.
+Sample Node.js Web Hooks handler web application for SharePoint. This application allows you to manage web hooks subscriptions for a specific list or library, how to listen to web hook events, to handle changes in items when they happen.
 
 ![Notification sample](./assets/homepage-view.png)
 
@@ -13,12 +13,13 @@ Sample Node.js webhook application for Sharepoint. This application allows you t
 ## Solution
 Solution | Author(s)
 ---------|----------
-Webhook.Nodejs | Elio Struyf (MVP, Ventigrate, [@eliostruyf](https://twitter.com/eliostruyf))
+Webhook.Nodejs | Elio Struyf (MVP, Ventigrate, [@eliostruyf](https://twitter.com/eliostruyf)), Massimo Prota (Rapid Circle)
 
 ### Version history
 Version  | Date | Comments
 ---------| -----| --------
 1.0.0  | September 27, 2016 | Initial release
+1.0.1  | February 10, 2017 | Small improvements in docs and packages
 
 ### Disclaimer
 **THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.**
@@ -31,10 +32,25 @@ You will need to register an Azure AD application with *application permissions*
 
 ### Azure AD application and certificate configuration
 - Create a new Azure AD application
-- Give the application the following permissions: **Read and write items in all site collections**
+- Make sure to add `http://localhost:3000` in the list of allowed Reply URLs
+
+![Reply URLs](./assets/azure-ad-replyurls-1.png)
+
+- Give the application the following permissions: **Read and write items and lists in all site collections**
 
 ![Read & Write permissions](./assets/azure-ad-permissions.png)
 
+- Trust the new application: as can be seen in the screenshot above (Requires Admin = Yes), the requested permission, and thus the application itself, needs to be approved by a tenant admin before it can be used. In order to do so, compose a URL as per example below, replacing values between `<..>` tokens with your own values, and open it with a web browser
+
+<code>
+https://login.windows.net/&lt;contoso.onmicrosoft.com&gt;/oauth2/authorize?client_id=&lt;app client id&gt;&response_type=code&redirect_uri=http%3A%2F%2Flocalhost:3000&response_mode=query&resource=00000003-0000-0ff1-ce00-000000000000&state=12345&prompt=admin_consent
+</code>
+
+You'll be redirected to the classic application permissions trust experience, where you'll have to authorize requested app's permissions.
+
+_**Note:** it isn't necessary to have the local application running at this point (described later), you'll be redirected probably to an error page (site not found), but that's ok :smirk:_
+
+### NodeJs enviroment configuration
 - Run `$ npm install -g keycred`
 - Run `$ keycred`
     - Fill in the questions
@@ -71,28 +87,39 @@ THE KEY ITSELF
 
 - Add the fingerPrint ID to the config.json file (check configuration section)
 
+If this is the first time you use NodeJS on the machine, or you're unsure:
+
+-  Run `$ npm install -g gulp typescript gulp-typescript`
+
 ### Installation & configuration
 - Clone this repo
 - Open your command prompt and navigate to the folder
-- Update the config.json file with the correct information:
-    - adalConfig
-        - authority: change the tenant name
-        - clientId: specify your Azure AD client application ID
-        - subscriptionUrl: the URL that SharePoint has to call. Use ngrok for testing.
-        - resouce: the URL of your SharePoint site for which you want to retrieve the access token
-        - fingerPrint: finger print of your certificate
-    - webhookConfig
-        - url: URL of the SharePoint site
-        - listName: name of the list / library to which you want to subscribe your webhook
-        - clientState: clientState name you want to use for your subscription
+- Create a file `config.json`, based on `config.sample.json` containing following information:
+```JSON
+{
+    "adalConfig": {
+        "authority": "https://login.microsoftonline.com/<tenant.onmicrosoft.com>",
+        "clientID": "<App AAD ClientId>",
+        "subscriptionUrl": "http://<web hook listener URL>/listen",
+        "resource": "https://<tenant>.sharepoint.com",
+        "fingerPrint": "<self-certificate fingerprint>"
+    },
+    "webhookConfig": {
+        "url": "https://<tenant>.sharepoint.com/sites/<site path>",
+        "listName": "<list name>",
+        "clientState": "WebHooksNodeSample"
+    }
+}
+```
+
 - Run: `$ npm install`
-- Run: `$ tsd install`
 
 ####  Local development
 During development you could test your webhook locally with the following steps:
 - Open another command prompt. Navigate to the ngrok folder and run:
     - `$ ngrok http 3000`
-    - copy the **https** forwarding URL of ngrok and use it in the config.json file for the **subscriptionUrl**
+    - copy the **https** forwarding URL of ngrok and use it in the `config.json` file for the _subscriptionUrl_ value
+    - make sure to add this URL also to the list of Reply URLs for the application in Azure AD, and save (it can take couple of minutes before changes are actually applied and propagated)
 - Run: `$ npm start`
-    - This transpiles TypeScript to JavaScript and start the server on http://localhost:3000
-- Navigate to http://localhost:3000
+    - This transpiles TypeScript to JavaScript and start the server on `http://localhost:3000`
+- Navigate to `http://localhost:3000`

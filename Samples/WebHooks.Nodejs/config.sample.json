@@ -1,0 +1,14 @@
+{
+    "adalConfig": {
+        "authority": "https://login.microsoftonline.com/<tenant.onmicrosoft.com>",
+        "clientID": "<App AAD ClientId>",
+        "subscriptionUrl": "http://<web hook listener URL>/listen",
+        "resource": "https://<tenant>.sharepoint.com",
+        "fingerPrint": "<self-certificate fingerprint>"
+    },
+    "webhookConfig": {
+        "url": "https://<tenant>.sharepoint.com/sites/<site path>",
+        "listName": "<list name>",
+        "clientState": "WebHooksNodeSample"
+    }
+}
