@@ -20,6 +20,7 @@ Version  | Date | Comments
 ---------| -----| --------
 1.0.0  | September 27, 2016 | Initial release
 1.0.1  | February 10, 2017 | Small improvements in docs and packages
+1.1.0  | July 23, 2017 | Improved handling of subscribed Web in ChangeHelper. Simplified setup documentation
 
 ### Disclaimer
 **THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.**
@@ -40,15 +41,10 @@ You will need to register an Azure AD application with *application permissions*
 
 ![Read & Write permissions](./assets/azure-ad-permissions.png)
 
-- Trust the new application: as can be seen in the screenshot above (Requires Admin = Yes), the requested permission, and thus the application itself, needs to be approved by a tenant admin before it can be used. In order to do so, compose a URL as per example below, replacing values between `<..>` tokens with your own values, and open it with a web browser
+- Make sure to perform admin trust for the registered application, as it is needed because we're requesting some Application Permission.  
+  This can be done via specific **Grant Permissions**  action available in Azure Portal
 
-<code>
-https://login.windows.net/&lt;contoso.onmicrosoft.com&gt;/oauth2/authorize?client_id=&lt;app client id&gt;&response_type=code&redirect_uri=http%3A%2F%2Flocalhost:3000&response_mode=query&resource=00000003-0000-0ff1-ce00-000000000000&state=12345&prompt=admin_consent
-</code>
-
-You'll be redirected to the classic application permissions trust experience, where you'll have to authorize requested app's permissions.
-
-_**Note:** it isn't necessary to have the local application running at this point (described later), you'll be redirected probably to an error page (site not found), but that's ok :smirk:_
+![Grant permissions - Admin trust](./assets/azure-ad-permissions-grant.png)
 
 ### NodeJs enviroment configuration
 - Run `$ npm install -g keycred`

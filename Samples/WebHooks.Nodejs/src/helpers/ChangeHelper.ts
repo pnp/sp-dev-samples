@@ -126,10 +126,11 @@ export default class ChangeHelper {
         return new Promise((resolve, reject) => {
             // Get site url
             let siteUrl = this.config.webhookConfig.url;
-            
+
             // Get the absolute web url
             request({
-                uri: `${siteUrl}/_api/web/webs?$filter=ID eq guid'${subVal.webId}'&$select=Url`,
+                uri: `${siteUrl}/_api/site/openWebById('${subVal.webId}')`,
+                method: 'POST',
                 headers: {
                     'Authorization': 'Bearer ' + token,
                     'Accept': 'application/json;odata=nometadata',
@@ -142,17 +143,11 @@ export default class ChangeHelper {
                 }
 
                 let result = JSON.parse(body);
-                if (typeof result.value !== "undefined" && result.value !== null) {
+                if (typeof result.Id !== "undefined" && result.Id === subVal.webId) {
                     // Retrieved value sample: '{"value":[{"Url":"https://..."}]}'
-                    let webVal = result.value;
-                    if (webVal.length > 0) {
-                        resolve(webVal[0]);
-                    } else {
-                        if (this.config.webhookConfig.url.indexOf(subVal.siteUrl) !== -1) {
-                            resolve({ Url: siteUrl });
-                        }
-                        resolve(null);
-                    }
+                    resolve({ Url: result.Url });
+                } else {
+                    resolve(null);
                 }
             });
         });
