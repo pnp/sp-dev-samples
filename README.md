@@ -10,3 +10,12 @@ you can easily deploy it on Azure.
 The solution has been created across Visual Studio and is ready to go on Azure:
 
 ![Azure Web Application](AzureNodeJS.PNG)
+
+## Dependencies
+
+This solution has the following dependencies:
+
+* body-parser
+* express
+* moment
+* Socket.io
