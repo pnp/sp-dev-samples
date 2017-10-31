@@ -1,32 +1,32 @@
 ﻿<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <meta charset="utf-8" />
-        <title>Webhooks broadcaster</title>
-        <script src="https://code.jquery.com/jquery-1.12.4.min.js"
-                integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-                crossorigin="anonymous"></script>
-    </head>
-    <body>
-        <h1>Welcome to webhooks broadcaster</h1>
-        <p>Here you can display the last webhooks received</p>
-        <h3>WebHooks log:</h3>
-        <a id="RefreshLog" href="#">Refresh log</a>
-        <div id="Log"></div>
-        <script>
-            $(document).ready(function () {
-                $('#RefreshLog').click(function () {
-                    _readLog();
-                });
+<head>
+    <meta charset="utf-8" />
+    <title>Webhooks broadcaster</title>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"
+            integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+            crossorigin="anonymous"></script>
+</head>
+<body>
+    <h1>Welcome to webhooks broadcaster</h1>
+    <p>Here you can display the last webhooks received</p>
+    <h3>WebHooks log:</h3>
+    <a id="RefreshLog" href="#">Refresh log</a>
+    <div id="Log"></div>
+    <script>
+        $(document).ready(function () {
+            $('#RefreshLog').click(function () {
                 _readLog();
             });
+            _readLog();
+        });
 
-            function _readLog() {
-                $.get('/webhooksLog.txt', function (data) {
-                    $('#Log').html(data.substring(0, 2500));
-                });
-            }
-        </script>
-    </body>
+        function _readLog() {
+            $.get('/webhooksLog.txt', function (data) {
+                $('#Log').html(data.substring(0, 2500));
+            });
+        }
+    </script>
+</body>
 </html>

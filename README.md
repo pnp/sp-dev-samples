@@ -2,6 +2,7 @@
 
 Node js application that allows to receive, display the webhooks and sending them through Socket.IO, 
 you can easily deploy it on Azure.
+The index page displays the last 6 webhooks received:
 
 ![Azure Node JS Web Application](NodeJSApp.PNG)
 

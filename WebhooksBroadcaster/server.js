@@ -26,25 +26,24 @@ app.post('/', function (req, res) {
         res.end(req.query.validationtoken);
     }
     else {
-        /* Write to file */
-        // Write changes in a file
-        var data = JSON.stringify(req.body.value);
-        console.log(JSON.stringify(req.body.value))
-        io.emit('list:changes', data);
-        //res.send(req.body.value);
-        const fileName = __dirname + '/public/webhooksLog.txt';
-        fs.exists(fileName, (exists) => {
-            let fileData = "";
-            if (exists) {
-                fileData = fs.readFileSync(fileName, 'utf8');
-            }
-            let txtFile = "";
-            txtFile += `<b>Retrieved</b>: ${m().toISOString()}</br>`;
-            txtFile += JSON.stringify(data);
-            fileData = txtFile + '</br></br>' + fileData;
-            fs.writeFileSync(fileName, fileData, { encoding: 'utf8' });
-        });
-        //if (typeof req.body.value !== "undefined" && req.body.value !== null) {
-        //}
+        if (typeof req.body.value !== "undefined" && req.body.value !== null) {
+            var data = JSON.stringify(req.body.value);
+            console.log(JSON.stringify(req.body.value))
+            io.emit('list:changes', data);
+            const fileName = __dirname + '/public/webhooksLog.txt';
+            /* Write to file */
+            // Write changes in a file
+            fs.exists(fileName, (exists) => {
+                let fileData = "";
+                if (exists) {
+                    fileData = fs.readFileSync(fileName, 'utf8');
+                }
+                let txtFile = "";
+                txtFile += `<b>Retrieved</b>: ${m().toISOString()}</br>`;
+                txtFile += JSON.stringify(data);
+                fileData = txtFile + '</br></br>' + fileData;
+                fs.writeFileSync(fileName, fileData, { encoding: 'utf8' });
+            });
+        }
     }
 });
