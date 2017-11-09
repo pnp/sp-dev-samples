@@ -21,5 +21,11 @@ This solution has the following dependencies:
 * moment
 * Socket.io
 
+## Deploy the solution
+
+* clone the repo
+* install missing npm packages
+* publish the solution on Azure
+
 > Read my blog post for more details: 
 > [http://www.delucagiuliano.com/building-a-real-time-news-feed-with-sharepoint-framework-and-webhooks](http://www.delucagiuliano.com/building-a-real-time-news-feed-with-sharepoint-framework-and-webhooks)
