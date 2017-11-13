@@ -1,0 +1,20 @@
+{
+  "name": "webhooks-broadcaster",
+  "version": "0.0.0",
+  "description": "WebhooksBroadcaster",
+  "scripts": {
+    "start": "node server"
+  },
+  "engines": {
+    "node": "~6.10.x"
+  },
+  "author": {
+    "name": "Giuliano De Luca | @giuleon | www.delucagiuliano.com"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "moment": "^2.19.1",
+    "socket.io": "^2.0.4"
+  }
+}
