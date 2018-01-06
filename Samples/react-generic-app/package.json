@@ -17,6 +17,7 @@
     "@types/react-dom": "^15.5.0",
     "css-loader": "^0.28.3",
     "react": "^15.5.4",
-    "react-dom": "^15.5.4"
+    "react-dom": "^15.5.4",
+    "style-loader": "^0.19.1"
   }
 }
