@@ -66,26 +66,28 @@ THE CERTIFICATE ITSELF
 -----END CERTIFICATE-----
 ```
 
-
-- In the Azure AD application, Upload a certificate using the **publickey.pem** file. This will update the application manifest.
+- In the Azure AD application, Upload a certificate using the **publickey.pem** file. This will update the application manifest:
 
 ![Add certificate](./assets/azure-ad-add-certificate.png)
 
-- Add the fingerPrint ID to the config.json file (check configuration section)
+- Take note of the certificate fingerprint (from keycred or the certificate upload information).
 
-If this is the first time you use NodeJS on the machine, or you're unsure:
+- In the Azure AD application overview, note the OAuth 2.0 Autorization endpoint (v2). This info will be used in the config.json as the ADAL authority.
 
--  Run `$ npm install -g gulp typescript gulp-typescript`
+![OAuth 2.0 Autorization endpoint](./assets/azure-ad-endpoints.png)
 
 ### Installation & configuration
+If this is the first time you use NodeJS on the machine, or you're unsure:
+-  Run `$ npm install -g gulp typescript gulp-typescript`
+
 - Clone this repo
 - Open your command prompt and navigate to the folder
 - Create a file `config.json`, based on `config.sample.json` containing following information:
 ```JSON
 {
     "adalConfig": {
-        "authority": "https://login.microsoftonline.com/<tenant.onmicrosoft.com>",
-        "clientID": "<App AAD ClientId>",
+        "authority": "https://login.microsoftonline.com/<TENANT-ID>/oauth2/v2.0/authorize",
+        "clientID": "<Azure AD Application (client) ID>",
         "subscriptionUrl": "http://<web hook listener URL>/listen",
         "resource": "https://<tenant>.sharepoint.com",
         "fingerPrint": "<self-certificate fingerprint>"
@@ -104,8 +106,8 @@ If this is the first time you use NodeJS on the machine, or you're unsure:
 During development you could test your webhook locally with the following steps:
 - Open another command prompt. Navigate to the ngrok folder and run:
     - `$ ngrok http 3000`
-    - copy the **https** forwarding URL of ngrok and use it in the `config.json` file for the _subscriptionUrl_ value
-    - make sure to add this URL also to the list of Reply URLs for the application in Azure AD, and save (it can take couple of minutes before changes are actually applied and propagated)
+    - Copy the **https** forwarding URL of ngrok and use it in the `config.json` file for the _subscriptionUrl_ value
+    - Make sure to add this URL also to the list of Reply URLs for the application in Azure AD, and save (it can take couple of minutes before changes are actually applied and propagated)
 - Run: `$ npm start`
     - This transpiles TypeScript to JavaScript and start the server on `http://localhost:3000`
 - Navigate to `http://localhost:3000`
