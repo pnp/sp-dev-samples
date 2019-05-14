@@ -32,19 +32,15 @@ Version  | Date | Comments
 You will need to register an Azure AD application with *application permissions*.
 
 ### Azure AD application and certificate configuration
-- Create a new Azure AD application
-- Make sure to add `http://localhost:3000` in the list of allowed Reply URLs
+- Register a new Azure AD application
+- Make sure to add `http://localhost:3000` in the list of allowed Redirect URIs
 
-![Reply URLs](./assets/azure-ad-replyurls-1.png)
+![Redirect URIs](./assets/azure-ad-replyurls-1.png)
 
-- Give the application the following permissions: **Read and write items and lists in all site collections**
-
+- Add the following API permissions for SharePoint (#1): **Read and write items and lists in all site collections**
+- Make sure to grant admin consent for the registered application (#2), as it is needed because we're requesting some Application Permission.  
+  
 ![Read & Write permissions](./assets/azure-ad-permissions.png)
-
-- Make sure to perform admin trust for the registered application, as it is needed because we're requesting some Application Permission.  
-  This can be done via specific **Grant Permissions**  action available in Azure Portal
-
-![Grant permissions - Admin trust](./assets/azure-ad-permissions-grant.png)
 
 ### NodeJs enviroment configuration
 - Run `$ npm install -g keycred`
@@ -54,25 +50,6 @@ You will need to register an Azure AD application with *application permissions*
 
 ![Certificate information](./assets/certificate.png)
 
-- Open the manifest of the Azure AD application and add the following information to the file:
-    - customKeyIdentifier
-    - value
-    - keyId
-
-```JSON
-"keyCredentials": [
-    {
-        "customKeyIdentifier": "customKeyIdentifier",
-        "keyId": "keyId",
-        "type": "AsymmetricX509Cert",
-        "usage": "Verify",
-        "value":  "value"
-    }
-],
-```
-
-![keyCredentials config](./assets/manifest.png)
-
 - In your project folder, create a new **privatekey.pem** file and paste in the private key information:
 
 ```
@@ -80,6 +57,19 @@ You will need to register an Azure AD application with *application permissions*
 THE KEY ITSELF
 -----END RSA PRIVATE KEY-----
 ```
+
+- In your project folder, create a new **publickey.pem** file and paste in the certificate information: 
+
+```
+-----BEGIN CERTIFICATE-----
+THE CERTIFICATE ITSELF
+-----END CERTIFICATE-----
+```
+
+
+- In the Azure AD application, Upload a certificate using the **publickey.pem** file. This will update the application manifest.
+
+![Add certificate](./assets/azure-ad-add-certificate.png)
 
 - Add the fingerPrint ID to the config.json file (check configuration section)
 
