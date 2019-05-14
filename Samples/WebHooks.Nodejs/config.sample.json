@@ -1,6 +1,6 @@
 {
     "adalConfig": {
-        "authority": "https://login.microsoftonline.com/<tenant.onmicrosoft.com>",
+        "authority": "https://login.microsoftonline.com/<TENANT-ID>/oauth2/v2.0/authorize",
         "clientID": "<App AAD ClientId>",
         "subscriptionUrl": "http://<web hook listener URL>/listen",
         "resource": "https://<tenant>.sharepoint.com",
