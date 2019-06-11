@@ -2,9 +2,9 @@
   "name": "sharepoint-webhook-test",
   "version": "1.0.0",
   "description": "",
-  "main": "./src/index.js",
+  "main": "./dist/index.js",
   "scripts": {
-    "start": "gulp typescript & node --debug --inspect ./src/index.js"
+    "start": "gulp typescript & node --debug --inspect ./dist/index.js"
   },
   "author": "Elio Struyf <info@estruyf.be> (http://www.eliostruyf.com)",
   "license": "MIT",

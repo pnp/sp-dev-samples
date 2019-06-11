@@ -10,3 +10,4 @@ src/*.js
 *.js.map
 *.pem
 *.log
+dist

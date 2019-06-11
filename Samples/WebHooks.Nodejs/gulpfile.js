@@ -10,7 +10,7 @@ gulp.task('typescript', () => {
         .pipe(sourcemaps.init())
         .pipe(ts())
         .pipe(sourcemaps.write('maps'))
-        .pipe(gulp.dest('./src/'));
+        .pipe(gulp.dest('./dist/'));
 });
 
 
