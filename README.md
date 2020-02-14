@@ -1,3 +1,13 @@
+---
+page_type: sample
+products:
+- office-sp
+languages:
+- aspx
+extensions:
+  contentType: samples
+  createdDate: 8/10/2016 10:44:23 AM
+---
 # SharePoint code samples for add-ins, webhooks and other APIs
 
 This repo contains the samples around add-in/app model, webhooks and other related APIs.
