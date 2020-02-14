@@ -1,3 +1,19 @@
+---
+page_type: sample
+products:
+- office-sp
+languages:
+- javascript
+- nodejs
+- typescript
+extensions:
+  contentType: samples
+  technologies:
+  - SharePoint Framework
+  createdDate: 1/1/2016 12:00:00 AM
+  scenarios:
+  - Connect
+---
 # Sample Node.js SharePoint webhook application
 
 ## Summary
